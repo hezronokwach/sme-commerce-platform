@@ -17,6 +17,10 @@ jobs:
   build-and-analyze:
     name: Build & SonarQube Update
     runs-on: ubuntu-latest
+    # Run steps execute inside the backend Maven project (deploy jobs have no checkout)
+    defaults:
+      run:
+        working-directory: backend
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
@@ -31,6 +35,7 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: backend/pom.xml
 
       # verify = compile + tests (Testcontainers) + package the jar
       - name: Build & Test
@@ -55,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: sme-commerce-${{ github.ref_name }}
-          path: target/*.jar
+          path: backend/target/*.jar
 
   # 2. Deployment to Staging Environment
   deploy-staging:

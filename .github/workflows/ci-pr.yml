@@ -13,6 +13,11 @@ concurrency:
   group: ci-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+# Every run step executes inside the backend Maven project
+defaults:
+  run:
+    working-directory: backend
+
 jobs:
   # 1. Detect hardcoded secrets
   secret-scan:
@@ -46,6 +51,7 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: backend/pom.xml
 
       # Pre-populate ~/.m2 so Trivy reads from local cache, avoiding Maven
       # Central rate limits (HTTP 429) during the filesystem scan.
@@ -86,6 +92,7 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: backend/pom.xml
 
       # Testcontainers uses the runner's Docker to start Postgres for the tests
       - name: Build & Test
@@ -96,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: test-reports
-          path: target/surefire-reports/
+          path: backend/target/surefire-reports/
 
       - name: Cache Sonar packages
         if: env.SONAR_TOKEN != ''

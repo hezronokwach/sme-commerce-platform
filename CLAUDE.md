@@ -16,8 +16,17 @@ and don't jump ahead of the current day's scope.
 ## Stack
 
 Java 25, Spring Boot 4.1.x, Spring Modulith 2.x, PostgreSQL (pgvector image), Flyway, Spring Security (JWT),
-Maven wrapper. Backend lives at the repo root (base package `com.hezron.smecommerce`). Angular admin and
-React storefront come later. Deploy: Render (backend + Postgres), Vercel (frontends).
+Maven wrapper. Deploy: Render (backend + Postgres), Vercel (frontends).
+
+## Repo layout
+
+| Folder | Contents |
+| --- | --- |
+| `backend/` | Spring Boot modulith (base package `com.hezron.smecommerce`), Maven wrapper, `compose.yaml` for local Postgres |
+| `admin-angular/` | Angular admin for owners and staff (not scaffolded yet) |
+| `storefront-react/` | React storefront for customers (not scaffolded yet) |
+| `infra/` | Deployment files shared across apps (Render Blueprint, full-stack Compose) |
+| `docs/` | Plan, architecture, database design, pseudocode guide |
 
 ## Rules that must hold
 
@@ -32,5 +41,5 @@ React storefront come later. Deploy: Render (backend + Postgres), Vercel (fronte
 
 ## Commands
 
-- Build and test: `./mvnw verify` (tests use Testcontainers, so Docker must be running)
+- Build and test (from `backend/`): `./mvnw verify` (tests use Testcontainers, so Docker must be running)
 - CI: `.github/workflows/ci-pr.yml` (PRs to main/staging), `.github/workflows/cd-pipeline.yml` (push to main/staging)
