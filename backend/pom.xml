@@ -29,6 +29,7 @@
     <properties>
         <java.version>25</java.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <!-- SonarQube Cloud: only used when CI has a SONAR_TOKEN secret -->
         <sonar.organization>hezronokwach</sonar.organization>
         <sonar.projectKey>hezronokwach_sme-commerce-platform</sonar.projectKey>
@@ -216,6 +217,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
