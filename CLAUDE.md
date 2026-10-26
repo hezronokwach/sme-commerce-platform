@@ -1,0 +1,36 @@
+# SME Commerce Platform
+
+Multi-tenant (Shopify-style) commerce platform built as a Spring Modulith. This is a learning project:
+the owner writes the code themselves following a 30-day plan. Explain the why, keep changes small,
+and don't jump ahead of the current day's scope.
+
+## Docs (source of truth — read the relevant one before designing anything)
+
+| Doc | Use it for |
+| --- | --- |
+| `docs/SME Commerce Platform 30-Day Build Plan.md` | Day-by-day tasks with a "Done when" line; scope tiers (Must/Should/Stretch) and cut order |
+| `docs/SME Commerce Platform Architecture and Design.md` | Modules, allowed dependencies, workflows W1–W9, state machines, payments, security, deployment |
+| `docs/SME Commerce Platform Database Design.md` | 22 tables, one schema per module, column conventions, migration order |
+| `docs/SME Commerce Platform Steps and Pseudocode Guide.md` | Pseudocode per use case, edge cases and tests; Part 8 covers Docker, CI, Render, Vercel |
+
+## Stack
+
+Java 25, Spring Boot 4.1.x, Spring Modulith 2.x, PostgreSQL (pgvector image), Flyway, Spring Security (JWT),
+Maven wrapper. Backend lives at the repo root (base package `com.hezron.smecommerce`). Angular admin and
+React storefront come later. Deploy: Render (backend + Postgres), Vercel (frontends).
+
+## Rules that must hold
+
+- Modules: tenant, identity, catalog, inventory, ordering, payments, notification, assistant, audit, plus a tiny `shared` kernel (value types only, no logic).
+- Modules talk only via the public API in their base package or via events. Everything under `internal/` is private. No entities across boundaries, no cross-schema joins, no cycles.
+- Allowed calls: identity→tenant; ordering→catalog, inventory, identity, tenant, payments; payments→tenant; assistant→catalog. Inventory and assistant listen to catalog events; ordering listens to tenant and payments events; notification listens to ordering and payments. Payments never listens to OrderPlaced.
+- Every tenant-owned table has `tenant_id`; queries are filtered automatically. Cross-tenant tests are mandatory.
+- Money is integer minor units + currency code. Timestamps UTC `timestamptz`. Phones normalised to 2547XXXXXXXX.
+- Payment state UNKNOWN is real: never show "failed" when the truth is unknown. Callbacks are idempotent (unique provider reference).
+- Secrets only in environment variables / git-ignored `.env`. Never log tokens, passwords or full phone numbers.
+- Never cut tests or the Modulith boundary verification test.
+
+## Commands
+
+- Build and test: `./mvnw verify` (tests use Testcontainers, so Docker must be running)
+- CI: `.github/workflows/ci-pr.yml` (PRs to main/staging), `.github/workflows/cd-pipeline.yml` (push to main/staging)

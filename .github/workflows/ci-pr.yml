@@ -1,0 +1,122 @@
+name: PR Quality & Security Gate
+
+on:
+  pull_request:
+    branches: [ staging, main ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# A new push to the same PR cancels the run that is still going
+concurrency:
+  group: ci-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # 1. Detect hardcoded secrets
+  secret-scan:
+    name: Secret Scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 2. Dependency Vulnerability Scanning
+  dependency-scan:
+    name: Dependency CVE Scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # needed to upload results to the Security tab
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      # Pre-populate ~/.m2 so Trivy reads from local cache, avoiding Maven
+      # Central rate limits (HTTP 429) during the filesystem scan.
+      - name: Warm Maven dependency cache
+        run: ./mvnw dependency:resolve --no-transfer-progress -q
+
+      # Pinned to a commit SHA (v0.36.0) instead of @master: a moving ref can change
+      # under you, and third-party security actions are a common supply-chain target.
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 3. Build, Tests (Testcontainers + Modulith verification), JaCoCo & optional SonarQube gate
+  build-and-sonar:
+    name: Build, Tests & SonarQube Gate
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # Sonar needs full history for blame / new-code detection
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      # Testcontainers uses the runner's Docker to start Postgres for the tests
+      - name: Build & Test
+        run: ./mvnw clean verify --no-transfer-progress
+
+      - name: Upload Test Reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+
+      - name: Cache Sonar packages
+        if: env.SONAR_TOKEN != ''
+        uses: actions/cache@v6
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # Skipped until a SONAR_TOKEN repo secret exists (see pom.xml for project key)
+      - name: SonarQube Analysis
+        if: env.SONAR_TOKEN != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Branch names are user-controlled; pass them as env vars, never inline in the script
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_BASE: ${{ github.base_ref }}
+        run: |
+          ./mvnw sonar:sonar --no-transfer-progress \
+            -Dsonar.pullrequest.key="$PR_NUMBER" \
+            -Dsonar.pullrequest.branch="$PR_BRANCH" \
+            -Dsonar.pullrequest.base="$PR_BASE"
