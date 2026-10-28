@@ -1,9 +1,21 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    # Same pgvector image as the tests (TestcontainersConfiguration); V1 runs CREATE EXTENSION vector.
+    image: 'pgvector/pgvector:pg17'
     environment:
       - 'POSTGRES_DB=mydatabase'
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
+    labels:
+      # Tells Spring Boot's Docker Compose support this is Postgres, since the image name isn't "postgres".
+      - 'org.springframework.boot.service-connection=postgres'
     ports:
-      - '5432'
+      # Fixed host port so a database GUI (IntelliJ, DBeaver, pgAdmin) can keep a saved connection.
+      # 5433, not 5432, to avoid clashing with other local Postgres containers.
+      - '5433:5432'
+    volumes:
+      # Keeps data between restarts, so a second startup finds the migrations already applied.
+      - 'pgdata:/var/lib/postgresql/data'
+
+volumes:
+  pgdata:
