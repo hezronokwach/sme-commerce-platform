@@ -12,11 +12,13 @@ import jakarta.persistence.PostPersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -54,10 +56,16 @@ public class StaffUserEntity implements Persistable<UUID> {
     @Enumerated(EnumType.STRING)
     private StaffStatus status;
 
+    /** Wrong passwords in a row. Reset by a successful login. */
     @Column(name = "failed_logins")
     private int failedLogins;
 
-    // last_login_at is mapped with login (it is only ever set there).
+    /** Set once failedLogins reaches the limit; login is refused until then. Added by V21. */
+    @Column(name = "locked_until")
+    private Instant lockedUntil;
+
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -84,6 +92,38 @@ public class StaffUserEntity implements Persistable<UUID> {
         user.createdAt = now;
         user.updatedAt = now;
         return user;
+    }
+
+    public boolean isLockedAt(Instant now) {
+        return lockedUntil != null && now.isBefore(lockedUntil);
+    }
+
+    /** Counts a wrong password and locks the account once the count reaches {@code maxAttempts}. */
+    public void recordFailedLogin(Instant now, int maxAttempts, Duration lockFor) {
+        if (lockedUntil != null && !now.isBefore(lockedUntil)) {
+            // An earlier lock has run out: the user gets a fresh set of attempts.
+            failedLogins = 0;
+            lockedUntil = null;
+        }
+        failedLogins++;
+        if (failedLogins >= maxAttempts) {
+            lockedUntil = now.plus(lockFor);
+        }
+    }
+
+    public void recordSuccessfulLogin(Instant now) {
+        failedLogins = 0;
+        lockedUntil = null;
+        lastLoginAt = now;
+    }
+
+    /**
+     * Written out (Lombok would generate it) only to say it's never null: Persistable declares getId()
+     * as nullable, but every staff user gets its id in newOwner.
+     */
+    @Override
+    public @NonNull UUID getId() {
+        return id;
     }
 
     @Override
