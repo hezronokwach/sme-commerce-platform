@@ -23,9 +23,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 @EnableConfigurationProperties(JwtProperties.class)
 class JwtConfig {
 
-    /** Claim holding the user's role, e.g. "OWNER". */
-    static final String ROLE_CLAIM = "role";
-
     @Bean
     SecretKey jwtSigningKey(JwtProperties properties) {
         return new SecretKeySpec(properties.secretBytes(), "HmacSHA256");
@@ -54,7 +51,7 @@ class JwtConfig {
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
-        authorities.setAuthoritiesClaimName(ROLE_CLAIM);
+        authorities.setAuthoritiesClaimName(TokenClaims.ROLE);
         authorities.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
