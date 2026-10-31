@@ -2,4 +2,6 @@
 |===
 |Base package
 |`com.hezron.smecommerce.identity`
+|Bean references
+|* `c.h.s.t.TenantApi` (in Tenant)
 |===
