@@ -48,3 +48,4 @@ Maven wrapper. Deploy: Render (backend + Postgres), Vercel (frontends).
 
 - Build and test (from `backend/`): `./mvnw verify` (tests use Testcontainers, so Docker must be running)
 - CI: `.github/workflows/ci-pr.yml` (PRs to main/staging), `.github/workflows/cd-pipeline.yml` (push to main/staging)
+-  Never add Claude attribution (Co-Authored-By lines or "Generated with Claude Code") to commits or PRs.

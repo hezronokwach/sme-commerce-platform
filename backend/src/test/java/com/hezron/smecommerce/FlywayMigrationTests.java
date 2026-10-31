@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Day 3 "done when": a clean database migrates from nothing on startup, and a second run changes nothing.
  * The Testcontainers database starts empty, so the context startup is the first run.
  */
 @Import(TestcontainersConfiguration.class)
+@ActiveProfiles("test")
 @SpringBootTest
 class FlywayMigrationTests {
 
