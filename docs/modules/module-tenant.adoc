@@ -2,4 +2,8 @@
 |===
 |Base package
 |`com.hezron.smecommerce.tenant`
+|Spring components
+|_Services_
+
+* `c.h.s.t.TenantApi` (via `c.h.s.t.internal.application.TenantService`)
 |===
