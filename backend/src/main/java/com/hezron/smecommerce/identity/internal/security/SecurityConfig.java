@@ -38,7 +38,9 @@ class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         // Storefront is public; the shop-from-slug filter comes with the tenant-context issue.
                         .requestMatchers("/api/store/**").permitAll()
-                        .requestMatchers("/api/admin/**").authenticated()
+                        // A valid token isn't enough: it must be a staff token (customer tokens will carry
+                        // another role), so a storefront login can never open the admin API.
+                        .requestMatchers("/api/admin/**").hasAnyRole("OWNER", "STAFF")
                         .anyRequest().denyAll())
                 // Reads "Authorization: Bearer ...", checks it with the JwtDecoder bean, 401 if anything is wrong.
                 .oauth2ResourceServer(oauth2 -> oauth2
