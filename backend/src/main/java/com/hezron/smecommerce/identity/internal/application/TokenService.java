@@ -55,7 +55,7 @@ class TokenService {
      * Pass a new family id for a login, and the current one for a refresh.
      */
     @Transactional
-    AuthTokens issue(StaffUserEntity user, UUID familyId) {
+    TokensResult issue(StaffUserEntity user, UUID familyId) {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -77,7 +77,7 @@ class TokenService {
         refreshTokens.save(RefreshTokenEntity.newToken(user.getTenantId(), SubjectType.STAFF, user.getId(),
                 sha256Hex(refreshToken), familyId, now.plus(jwt.refreshTtl())));
 
-        return new AuthTokens(accessToken, jwt.accessTtl(), refreshToken, jwt.refreshTtl());
+        return new TokensResult(accessToken, jwt.accessTtl(), refreshToken, jwt.refreshTtl());
     }
 
     /**
@@ -88,7 +88,7 @@ class TokenService {
      * rolls the transaction back, which would undo the revoke.
      */
     @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
-    AuthTokens rotate(String refreshToken) {
+    TokensResult rotate(String refreshToken) {
         Instant now = Instant.now();
         RefreshTokenEntity current = refreshTokens.findByTokenHash(sha256Hex(refreshToken))
                 .filter(token -> token.isActiveAt(now))
