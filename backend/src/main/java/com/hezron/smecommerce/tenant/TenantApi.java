@@ -17,4 +17,12 @@ public interface TenantApi {
      */
     TenantId createTenant(String shopName, String slug);
 
+    /**
+     * Turns a storefront web name into the shop's id. Storefront endpoints call this first, then pass
+     * the id into their own queries ({@code WHERE tenant_id = ?}).
+     *
+     * @throws ShopNotFoundException if no shop has this slug, or the shop is suspended
+     */
+    TenantId findActiveTenantIdBySlug(String slug);
+
 }

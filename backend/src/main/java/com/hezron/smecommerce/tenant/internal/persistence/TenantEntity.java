@@ -13,6 +13,7 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -64,6 +65,20 @@ public class TenantEntity implements Persistable<UUID> {
         this.currency = "KES";
         this.createdAt = now;
         this.updatedAt = now;
+    }
+
+    /**
+     * Written out (Lombok would generate it) only to say it's never null: Persistable declares getId()
+     * as nullable, but every shop gets its id in the constructor.
+     */
+    @Override
+    public @NonNull UUID getId() {
+        return id;
+    }
+
+    /** Open for business. A SUSPENDED shop keeps its data but its storefront is closed. */
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
     }
 
     @Override
