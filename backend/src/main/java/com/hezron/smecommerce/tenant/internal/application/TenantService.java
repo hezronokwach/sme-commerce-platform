@@ -1,6 +1,7 @@
 package com.hezron.smecommerce.tenant.internal.application;
 
 import com.hezron.smecommerce.shared.TenantId;
+import com.hezron.smecommerce.tenant.ShopNotFoundException;
 import com.hezron.smecommerce.tenant.SlugNotAllowedException;
 import com.hezron.smecommerce.tenant.SlugTakenException;
 import com.hezron.smecommerce.tenant.TenantApi;
@@ -9,6 +10,7 @@ import com.hezron.smecommerce.tenant.internal.persistence.TenantBrandingEntity;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantBrandingRepository;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantEntity;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantRepository;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -64,6 +66,20 @@ class TenantService implements TenantApi {
         TenantId tenantId = TenantId.of(id);
         events.publishEvent(new TenantCreatedEvent(tenantId, slug, shopName));
         return tenantId;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TenantId findActiveTenantIdBySlug(String slug) {
+        return tenants.findBySlug(normaliseSlug(slug))
+                .filter(TenantEntity::isActive)
+                .map(tenant -> TenantId.of(tenant.getId()))
+                .orElseThrow(() -> new ShopNotFoundException(slug));
+    }
+
+    /** Slugs are stored lowercase, so /s/Mama-Mboga and /s/mama-mboga find the same shop. */
+    static String normaliseSlug(String slug) {
+        return slug.strip().toLowerCase(Locale.ROOT);
     }
 
     private static void checkSlugAllowed(String slug) {

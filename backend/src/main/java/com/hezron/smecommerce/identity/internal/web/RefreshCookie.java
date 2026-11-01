@@ -1,6 +1,6 @@
 package com.hezron.smecommerce.identity.internal.web;
 
-import com.hezron.smecommerce.identity.internal.application.AuthTokens;
+import com.hezron.smecommerce.identity.internal.application.TokensResult;
 import java.time.Duration;
 import org.springframework.http.ResponseCookie;
 
@@ -22,12 +22,12 @@ final class RefreshCookie {
     }
 
     /** Set-Cookie header value holding the new refresh token. */
-    static String with(AuthTokens tokens) {
+    static String headerFor(TokensResult tokens) {
         return build(tokens.refreshToken(), tokens.refreshTokenTtl());
     }
 
     /** Set-Cookie header value that makes the browser delete the cookie (Max-Age=0). */
-    static String cleared() {
+    static String clearingHeader() {
         return build("", Duration.ZERO);
     }
 

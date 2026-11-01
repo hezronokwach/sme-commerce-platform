@@ -1,6 +1,6 @@
 package com.hezron.smecommerce.identity.internal.web;
 
-import com.hezron.smecommerce.identity.internal.application.AuthTokens;
+import com.hezron.smecommerce.identity.internal.application.TokensResult;
 
 /**
  * JSON returned by login and refresh. The refresh token is not in here: it travels in the cookie.
@@ -9,7 +9,7 @@ import com.hezron.smecommerce.identity.internal.application.AuthTokens;
  */
 record TokenResponse(String accessToken, long expiresIn) {
 
-    static TokenResponse from(AuthTokens tokens) {
+    static TokenResponse fromResult(TokensResult tokens) {
         return new TokenResponse(tokens.accessToken(), tokens.accessTokenTtl().toSeconds());
     }
 

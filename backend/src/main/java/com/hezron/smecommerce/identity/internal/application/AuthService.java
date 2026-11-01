@@ -19,14 +19,14 @@ public interface AuthService {
      * @throws InvalidCredentialsException if the email is unknown, the password is wrong or the account isn't active
      * @throws TooManyAttemptsException    if the account is locked after too many wrong passwords
      */
-    AuthTokens login(LoginCommand command);
+    TokensResult login(LoginCommand command);
 
     /**
      * Exchanges a refresh token for a new pair. Each refresh token works once.
      *
      * @throws InvalidRefreshTokenException if the token is missing, unknown, expired, revoked or reused
      */
-    AuthTokens refresh(String refreshToken);
+    TokensResult refresh(String refreshToken);
 
     /** Ends the login session of this refresh token. Does nothing for a missing or unknown token. */
     void logout(String refreshToken);

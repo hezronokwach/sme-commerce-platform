@@ -36,7 +36,14 @@ public class TenantBrandingEntity implements Persistable<UUID> {
     @Column(name = "accent_color")
     private String accentColor;
 
-    // logo_url and tagline are mapped when the owner can set them (shop settings).
+    // logo_url and tagline are only read for now (the storefront profile shows them). Nothing sets them
+    // until shop settings exist, so they stay null; Hibernate fills them when loading.
+    @SuppressWarnings("unused")
+    @Column(name = "logo_url")
+    private String logoUrl;
+
+    @SuppressWarnings("unused")
+    private String tagline;
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;

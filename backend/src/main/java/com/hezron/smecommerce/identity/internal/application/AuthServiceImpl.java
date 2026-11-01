@@ -79,7 +79,7 @@ class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthTokens login(LoginCommand command) {
+    public TokensResult login(LoginCommand command) {
         Optional<StaffUserEntity> found = staffUsers.findByEmail(normaliseEmail(command.email()));
 
         // Exactly one bcrypt check on every path. Skipping it for unknown emails would make those answers
@@ -114,7 +114,7 @@ class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthTokens refresh(String refreshToken) {
+    public TokensResult refresh(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new InvalidRefreshTokenException();
         }
