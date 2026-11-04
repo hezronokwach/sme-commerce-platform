@@ -3,7 +3,10 @@ package com.hezron.smecommerce.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hezron.smecommerce.TestcontainersConfiguration;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.servlet.http.Cookie;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +76,16 @@ class LoginAndRefreshTests {
 
         assertThat(wrongPassword).hasStatus(HttpStatus.UNAUTHORIZED);
         assertThat(unknownEmail).hasStatus(HttpStatus.UNAUTHORIZED);
-        assertThat(wrongPassword.getResponse().getContentAsString())
-                .isEqualTo(unknownEmail.getResponse().getContentAsString());
+        // Every field that could give away whether the email exists must match. (correlationId and
+        // timestamp differ per request by design; they say nothing about the account.)
+        assertThat(withoutPerRequestFields(wrongPassword)).isEqualTo(withoutPerRequestFields(unknownEmail));
+    }
+
+    private static Map<String, Object> withoutPerRequestFields(MvcTestResult result) throws Exception {
+        Map<String, Object> body = new HashMap<>(JsonPath.read(result.getResponse().getContentAsString(), "$"));
+        body.remove("correlationId");
+        body.remove("timestamp");
+        return body;
     }
 
     @Test
