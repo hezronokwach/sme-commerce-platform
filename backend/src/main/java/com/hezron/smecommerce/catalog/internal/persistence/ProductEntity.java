@@ -99,6 +99,25 @@ public class ProductEntity implements Persistable<UUID> {
         return product;
     }
 
+    /**
+     * Owner edits the product. The id, shop, slug and currency stay the same: the slug is the product
+     * page's address, so changing it would break links customers already have.
+     */
+    public void changeDetails(UUID categoryId, String name, String description, long priceMinor,
+            String imageUrl, ProductStatus status) {
+        this.categoryId = categoryId;
+        this.name = name;
+        this.description = description;
+        this.priceMinor = priceMinor;
+        this.imageUrl = imageUrl;
+        this.status = status;
+    }
+
+    /** Off sale for good. The row stays, because past orders point at it. */
+    public void archive() {
+        this.status = ProductStatus.ARCHIVED;
+    }
+
     /** The two money columns as one value. */
     public Money getPrice() {
         return Money.of(priceMinor, currency);
