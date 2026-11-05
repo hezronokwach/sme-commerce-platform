@@ -9,10 +9,6 @@ include::module-assistant.adoc[]
 plantuml::module-audit.puml[,,format=svg]
 include::module-audit.adoc[]
 
-== Inventory
-plantuml::module-inventory.puml[,,format=svg]
-include::module-inventory.adoc[]
-
 == Notification
 plantuml::module-notification.puml[,,format=svg]
 include::module-notification.adoc[]
@@ -40,4 +36,8 @@ include::module-tenant.adoc[]
 == Identity
 plantuml::module-identity.puml[,,format=svg]
 include::module-identity.adoc[]
+
+== Inventory
+plantuml::module-inventory.puml[,,format=svg]
+include::module-inventory.adoc[]
 

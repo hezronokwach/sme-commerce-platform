@@ -35,7 +35,7 @@ class FlywayMigrationTests {
                 .map(Object::toString)
                 .toList();
 
-        assertThat(applied).contains("1", "10", "20", "21", "30");
+        assertThat(applied).contains("1", "10", "20", "21", "30", "40", "95");
         assertThat(flyway.info().pending()).isEmpty();
     }
 
@@ -73,6 +73,15 @@ class FlywayMigrationTests {
                 """, String.class);
 
         assertThat(tables).containsExactlyInAnyOrder("categories", "products");
+    }
+
+    @Test
+    void createsInventoryTablesInTheInventorySchema() {
+        List<String> tables = jdbc.queryForList("""
+                SELECT table_name FROM information_schema.tables WHERE table_schema = 'inventory'
+                """, String.class);
+
+        assertThat(tables).containsExactlyInAnyOrder("stock_items", "reservations", "stock_movements");
     }
 
 }
