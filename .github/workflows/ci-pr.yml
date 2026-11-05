@@ -74,7 +74,42 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # 3. Build, Tests (Testcontainers + Modulith verification), JaCoCo & optional SonarQube gate
+  # 3. Angular admin: generated API client up to date, unit tests, production build
+  admin-angular:
+    name: Admin (Angular) Build & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-angular
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      # Angular 22 needs Node 22.22.3+ or 24.15+; 24 is the current LTS line.
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: admin-angular/package-lock.json
+
+      # npm ci installs exactly what package-lock.json says (no surprise upgrades).
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails if docs/api/openapi.json changed but src/app/api wasn't regenerated and committed.
+      - name: Check the API client matches the API description
+        run: |
+          npm run generate-api
+          git diff --exit-code -- src/app/api
+
+      - name: Unit tests
+        run: npx ng test --watch=false
+
+      - name: Production build
+        run: npm run build
+
+  # 4. Build, Tests (Testcontainers + Modulith verification), JaCoCo & optional SonarQube gate
   build-and-sonar:
     name: Build, Tests & SonarQube Gate
     runs-on: ubuntu-latest

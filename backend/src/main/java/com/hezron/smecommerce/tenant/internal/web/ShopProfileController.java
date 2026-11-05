@@ -21,7 +21,7 @@ class ShopProfileController {
     }
 
     @GetMapping("/{slug}")
-    ShopProfileResponse getProfile(@PathVariable String slug) {
+    ShopProfileResponse get(@PathVariable String slug) {
         return ShopProfileResponse.fromResult(shopProfileService.getProfile(slug));
     }
 

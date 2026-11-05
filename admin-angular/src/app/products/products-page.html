@@ -1,0 +1,36 @@
+<main class="products">
+  <header>
+    <h1>Products</h1>
+    <button type="button" (click)="logOut()">Log out</button>
+  </header>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  } @else if (rows().length === 0) {
+    <p>No products yet.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- One row per product. "track" tells Angular which row is which when the list changes. -->
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>{{ row.name }}</td>
+            <td class="price">{{ row.price }}</td>
+            <td>{{ row.categoryName }}</td>
+            <td>{{ row.status }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</main>
