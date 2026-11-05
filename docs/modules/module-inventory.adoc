@@ -2,4 +2,10 @@
 |===
 |Base package
 |`com.hezron.smecommerce.inventory`
+|Spring components
+|_Services_
+
+* `c.h.s.i.InventoryApi` (via `c.h.s.i.internal.application.ReservationService`)
+|Events listened to
+|* `c.h.s.c.ProductCreatedEvent` (async) 
 |===

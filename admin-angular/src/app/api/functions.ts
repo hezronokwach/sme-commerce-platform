@@ -27,6 +27,10 @@ export type { AuthLogout$Params as AuthLogout$Params } from './fn/auth/auth-logo
 export { authLogout as authLogout } from './fn/auth/auth-logout';
 export type { AuthLogin$Params as AuthLogin$Params } from './fn/auth/auth-login';
 export { authLogin as authLogin } from './fn/auth/auth-login';
+export type { StockAdjust$Params as StockAdjust$Params } from './fn/stock/stock-adjust';
+export { stockAdjust as stockAdjust } from './fn/stock/stock-adjust';
+export type { StockGet$Params as StockGet$Params } from './fn/stock/stock-get';
+export { stockGet as stockGet } from './fn/stock/stock-get';
 export type { ShopProfileGet$Params as ShopProfileGet$Params } from './fn/shop-profile/shop-profile-get';
 export { shopProfileGet as shopProfileGet } from './fn/shop-profile/shop-profile-get';
 export type { StaffList$Params as StaffList$Params } from './fn/staff/staff-list';
