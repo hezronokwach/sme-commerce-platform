@@ -1,0 +1,28 @@
+<main class="login">
+  <h1>Shop admin</h1>
+
+  <!-- (ngSubmit) runs logIn() when the button is clicked or Enter is pressed. -->
+  <form (ngSubmit)="logIn()">
+    <label>
+      Email
+      <input name="email" type="email" autocomplete="username" required [(ngModel)]="email" />
+    </label>
+
+    <label>
+      Password
+      <input name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" />
+    </label>
+
+    <button type="submit" [disabled]="busy()">
+      @if (busy()) {
+        Logging in…
+      } @else {
+        Log in
+      }
+    </button>
+
+    @if (errorMessage() !== null) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+  </form>
+</main>
