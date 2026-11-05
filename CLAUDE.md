@@ -21,7 +21,9 @@ kernel is `shared` (open, depends on nothing).
 ## Stack
 
 Java 25, Spring Boot 4.1.x, Spring Modulith 2.x, PostgreSQL (pgvector image), Flyway, Spring Security (JWT),
-Maven wrapper. Deploy: Render (backend + Postgres), Vercel (frontends).
+Maven wrapper, springdoc OpenAPI (Swagger UI at `/swagger-ui.html`). LLM: **Groq, not OpenAI** (Spring AI's
+OpenAI-compatible client pointed at Groq, key in `GROQ_API_KEY`; Groq has no embeddings API, see ADR 0007).
+Deploy: Render (backend + Postgres), Vercel (frontends).
 
 ## Repo layout
 

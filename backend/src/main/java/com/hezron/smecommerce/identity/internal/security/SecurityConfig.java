@@ -1,5 +1,6 @@
 package com.hezron.smecommerce.identity.internal.security;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -9,7 +10,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
  * The main API filter chain. It handles every request that no more specific chain claimed first
@@ -25,7 +30,20 @@ class SecurityConfig {
     // No @Order on purpose: an unordered chain sorts last, after every module's more specific chain.
     @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http,
-            JwtAuthenticationConverter jwtAuthenticationConverter) {
+            JwtAuthenticationConverter jwtAuthenticationConverter,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver errorResolver) {
+        // 401 and 403 happen in these filters, before any controller, so the app's error handler would
+        // never see them. Passing them to Spring MVC's exception resolver sends them to the same handler,
+        // so they get the same JSON shape as every other error.
+        BearerTokenAuthenticationEntryPoint bearerEntryPoint = new BearerTokenAuthenticationEntryPoint();
+        AuthenticationEntryPoint whenNotLoggedIn = (request, response, exception) -> {
+            // Sets 401 and the standard "WWW-Authenticate: Bearer ..." header; the resolver writes the body.
+            bearerEntryPoint.commence(request, response, exception);
+            errorResolver.resolveException(request, response, null, exception);
+        };
+        AccessDeniedHandler whenNotAllowed =
+                (request, response, exception) -> errorResolver.resolveException(request, response, null, exception);
+
         http
                 // Tokens travel in a header the browser never adds by itself, so there is nothing for CSRF to abuse.
                 .csrf(AbstractHttpConfigurer::disable)
@@ -34,9 +52,13 @@ class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        // The API description and Swagger UI only describe endpoints; each endpoint still
+                        // checks its own token. (The deployment issue decides whether prod hides them.)
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
+                        .permitAll()
                         // Spring forwards failed requests here to render the error; keep it reachable.
                         .requestMatchers("/error").permitAll()
-                        // Storefront is public; the shop-from-slug filter comes with the tenant-context issue.
+                        // Storefront is public; each endpoint finds its shop from the slug in the URL.
                         .requestMatchers("/api/store/**").permitAll()
                         // A valid token isn't enough: it must be a staff token (customer tokens will carry
                         // another role), so a storefront login can never open the admin API.
@@ -44,7 +66,13 @@ class SecurityConfig {
                         .anyRequest().denyAll())
                 // Reads "Authorization: Bearer ...", checks it with the JwtDecoder bean, 401 if anything is wrong.
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .authenticationEntryPoint(whenNotLoggedIn)
+                        .accessDeniedHandler(whenNotAllowed))
+                // Same for requests with no token at all (for example a path that is denyAll).
+                .exceptionHandling(errors -> errors
+                        .authenticationEntryPoint(whenNotLoggedIn)
+                        .accessDeniedHandler(whenNotAllowed));
         return http.build();
     }
 

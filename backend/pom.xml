@@ -30,6 +30,8 @@
         <java.version>25</java.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <jacoco.version>0.8.15</jacoco.version>
+        <!-- OpenAPI description + Swagger UI. 3.x is the line for Spring Boot 4. -->
+        <springdoc.version>3.1.1</springdoc.version>
         <!-- SonarQube Cloud: only used when CI has a SONAR_TOKEN secret -->
         <sonar.organization>hezronokwach</sonar.organization>
         <sonar.projectKey>hezronokwach_sme-commerce-platform</sonar.projectKey>
@@ -56,6 +58,12 @@
             <!-- Validates bearer JWTs on every request; also brings Nimbus JOSE for signing them -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Builds /v3/api-docs (the API description) from the controllers, and serves Swagger UI. -->
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
