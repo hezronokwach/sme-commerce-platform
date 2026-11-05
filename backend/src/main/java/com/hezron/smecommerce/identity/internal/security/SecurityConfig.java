@@ -52,6 +52,10 @@ class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        // The API description and Swagger UI only describe endpoints; each endpoint still
+                        // checks its own token. (The deployment issue decides whether prod hides them.)
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
+                        .permitAll()
                         // Spring forwards failed requests here to render the error; keep it reachable.
                         .requestMatchers("/error").permitAll()
                         // Storefront is public; each endpoint finds its shop from the slug in the URL.
