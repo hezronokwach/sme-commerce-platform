@@ -7,6 +7,7 @@ export { RequestBuilder } from './request-builder';
 export type { StrictHttpResponse } from './strict-http-response';
 export { Api } from './api';
 
+export type { AdjustStockRequest } from './models/adjust-stock-request';
 export type { CategoryResponse } from './models/category-response';
 export type { CreateProductRequest } from './models/create-product-request';
 export type { LoginRequest } from './models/login-request';
@@ -17,6 +18,7 @@ export type { ShopProfileResponse } from './models/shop-profile-response';
 export type { SignUpRequest } from './models/sign-up-request';
 export type { SignUpResponse } from './models/sign-up-response';
 export type { StaffResponse } from './models/staff-response';
+export type { StockResponse } from './models/stock-response';
 export type { TokenResponse } from './models/token-response';
 export type { UpdateProductRequest } from './models/update-product-request';
 
@@ -46,6 +48,10 @@ export type { AuthLogout$Params as AuthLogout$Params } from './fn/auth/auth-logo
 export { authLogout as authLogout } from './fn/auth/auth-logout';
 export type { AuthLogin$Params as AuthLogin$Params } from './fn/auth/auth-login';
 export { authLogin as authLogin } from './fn/auth/auth-login';
+export type { StockAdjust$Params as StockAdjust$Params } from './fn/stock/stock-adjust';
+export { stockAdjust as stockAdjust } from './fn/stock/stock-adjust';
+export type { StockGet$Params as StockGet$Params } from './fn/stock/stock-get';
+export { stockGet as stockGet } from './fn/stock/stock-get';
 export type { ShopProfileGet$Params as ShopProfileGet$Params } from './fn/shop-profile/shop-profile-get';
 export { shopProfileGet as shopProfileGet } from './fn/shop-profile/shop-profile-get';
 export type { StaffList$Params as StaffList$Params } from './fn/staff/staff-list';
