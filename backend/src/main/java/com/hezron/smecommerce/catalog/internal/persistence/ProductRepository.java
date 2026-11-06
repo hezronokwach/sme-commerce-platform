@@ -20,6 +20,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     /** {@code WHERE id = ? AND tenant_id = ?}: empty if the product belongs to another shop. */
     Optional<ProductEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
+    /** {@code WHERE tenant_id = ? AND id IN (...)}: several products of one shop in one query. */
+    List<ProductEntity> findAllByTenantIdAndIdIn(UUID tenantId, List<UUID> ids);
+
     /** Is this web name already used by a product in this shop? */
     boolean existsByTenantIdAndSlug(UUID tenantId, String slug);
 
