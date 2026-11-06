@@ -19,6 +19,8 @@ export type { CategoryList$Params as CategoryList$Params } from './fn/category/c
 export { categoryList as categoryList } from './fn/category/category-list';
 export type { CategoryCreate$Params as CategoryCreate$Params } from './fn/category/category-create';
 export { categoryCreate as categoryCreate } from './fn/category/category-create';
+export type { StorefrontOrderPlace$Params as StorefrontOrderPlace$Params } from './fn/storefront-order/storefront-order-place';
+export { storefrontOrderPlace as storefrontOrderPlace } from './fn/storefront-order/storefront-order-place';
 export type { AuthSignUp$Params as AuthSignUp$Params } from './fn/auth/auth-sign-up';
 export { authSignUp as authSignUp } from './fn/auth/auth-sign-up';
 export type { AuthRefresh$Params as AuthRefresh$Params } from './fn/auth/auth-refresh';

@@ -4,8 +4,11 @@
 export type { AdjustStockRequest } from './models/adjust-stock-request';
 export type { CategoryResponse } from './models/category-response';
 export type { CreateProductRequest } from './models/create-product-request';
+export type { LineRequest } from './models/line-request';
 export type { LoginRequest } from './models/login-request';
 export type { MeResponse } from './models/me-response';
+export type { PlaceOrderRequest } from './models/place-order-request';
+export type { PlaceOrderResponse } from './models/place-order-response';
 export type { ProductResponse } from './models/product-response';
 export type { SaveCategoryRequest } from './models/save-category-request';
 export type { ShopProfileResponse } from './models/shop-profile-response';

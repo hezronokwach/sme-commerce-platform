@@ -13,10 +13,6 @@ include::module-audit.adoc[]
 plantuml::module-notification.puml[,,format=svg]
 include::module-notification.adoc[]
 
-== Ordering
-plantuml::module-ordering.puml[,,format=svg]
-include::module-ordering.adoc[]
-
 == Payments
 plantuml::module-payments.puml[,,format=svg]
 include::module-payments.adoc[]
@@ -40,4 +36,8 @@ include::module-identity.adoc[]
 == Inventory
 plantuml::module-inventory.puml[,,format=svg]
 include::module-inventory.adoc[]
+
+== Ordering
+plantuml::module-ordering.puml[,,format=svg]
+include::module-ordering.adoc[]
 

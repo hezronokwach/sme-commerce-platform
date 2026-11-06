@@ -2,6 +2,10 @@
 |===
 |Base package
 |`com.hezron.smecommerce.identity`
+|Spring components
+|_Services_
+
+* `c.h.s.i.IdentityApi` (via `c.h.s.i.internal.application.CustomerService`)
 |Bean references
 |* `c.h.s.t.TenantApi` (in Tenant)
 |===
