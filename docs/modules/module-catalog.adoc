@@ -2,4 +2,8 @@
 |===
 |Base package
 |`com.hezron.smecommerce.catalog`
+|Spring components
+|_Services_
+
+* `c.h.s.c.CatalogApi` (via `c.h.s.c.internal.application.CatalogApiService`)
 |===

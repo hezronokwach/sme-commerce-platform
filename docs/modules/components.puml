@@ -17,20 +17,26 @@ top to bottom direction
 
 System_Boundary("SMECommerce_boundary", "SME Commerce", $tags="") {
   Container_Boundary("SMECommerce.SMECommerce_boundary", "SME Commerce", $tags="") {
-    Component(SMECommerce.SMECommerce.Tenant, "Tenant", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.Identity, "Identity", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.Inventory, "Inventory", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.Ordering, "Ordering", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.SharedKernel, "Shared Kernel", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.Catalog, "Catalog", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.Tenant, "Tenant", $techn="Module", $descr="", $tags="", $link="")
   }
 
 }
 
 Rel(SMECommerce.SMECommerce.Catalog, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
-Rel(SMECommerce.SMECommerce.Identity, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
-Rel(SMECommerce.SMECommerce.Identity, SMECommerce.SMECommerce.Tenant, "uses", $techn="", $tags="", $link="")
 Rel(SMECommerce.SMECommerce.Inventory, SMECommerce.SMECommerce.Catalog, "listens to", $techn="", $tags="", $link="")
 Rel(SMECommerce.SMECommerce.Inventory, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Tenant, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Catalog, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Identity, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Inventory, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Identity, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Identity, SMECommerce.SMECommerce.Tenant, "uses", $techn="", $tags="", $link="")
 Rel(SMECommerce.SMECommerce.Tenant, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)

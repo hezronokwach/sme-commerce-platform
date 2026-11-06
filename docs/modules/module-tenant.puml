@@ -17,8 +17,8 @@ top to bottom direction
 
 System_Boundary("SMECommerce_boundary", "SME Commerce", $tags="") {
   Container_Boundary("SMECommerce.SMECommerce_boundary", "SME Commerce", $tags="") {
-    Component(SMECommerce.SMECommerce.Tenant, "Tenant", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.SharedKernel, "Shared Kernel", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.Tenant, "Tenant", $techn="Module", $descr="", $tags="", $link="")
   }
 
 }
