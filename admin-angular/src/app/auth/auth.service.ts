@@ -4,6 +4,7 @@ import { authLogin } from '../api/fn/auth/auth-login';
 import { authLogout } from '../api/fn/auth/auth-logout';
 import { authRefresh } from '../api/fn/auth/auth-refresh';
 import { TokenResponse } from '../api/models/token-response';
+import { roleFromToken } from './token-role';
 
 /**
  * Who is logged in, and the access token that proves it.
@@ -29,6 +30,23 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.accessToken() !== null;
+  }
+
+  /**
+   * The logged-in user's role: 'OWNER' or 'STAFF', or null when logged out. Read from the token
+   * itself, so it is always the role of the token we are using (also right after a refresh).
+   */
+  getRole(): string | null {
+    const token = this.accessToken();
+    if (token === null) {
+      return null;
+    }
+    return roleFromToken(token);
+  }
+
+  /** Owners may open Settings (staff, shop profile); staff may not. */
+  isOwner(): boolean {
+    return this.getRole() === 'OWNER';
   }
 
   /**

@@ -1,0 +1,21 @@
+<header class="top-bar">
+  <span class="shop">Shop admin</span>
+
+  <!-- routerLink opens a page without reloading the app; routerLinkActive adds the "active" class
+       to the link of the page you are on. -->
+  <nav>
+    <a routerLink="/products" routerLinkActive="active">Products</a>
+    <a routerLink="/orders" routerLinkActive="active">Orders</a>
+    @if (showSettings()) {
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+    }
+  </nav>
+
+  <div class="account">
+    <span class="role">{{ roleLabel() }}</span>
+    <button type="button" (click)="logOut()">Log out</button>
+  </div>
+</header>
+
+<!-- The current page (products, orders, ...) is shown here. -->
+<router-outlet />

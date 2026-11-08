@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Api } from '../api/api';
 import { categoryList } from '../api/fn/category/category-list';
 import { productList } from '../api/fn/product/product-list';
 import { CategoryResponse } from '../api/models/category-response';
 import { ProductResponse } from '../api/models/product-response';
-import { AuthService } from '../auth/auth.service';
 import { formatPrice } from './format-price';
+import { textOrEmpty } from '../shared/text-or-empty';
 
 /** One table row: what the page shows for a product. */
 interface ProductRow {
@@ -18,18 +18,17 @@ interface ProductRow {
 }
 
 /**
- * The product list at /products (only reachable when logged in, see authGuard).
+ * The product list at /products, inside AdminLayout (only reachable when logged in, see authGuard).
  * Loads the shop's products and categories, then shows one row per product.
  */
 @Component({
   selector: 'app-products-page',
+  imports: [RouterLink],
   templateUrl: './products-page.html',
   styleUrl: './products-page.css',
 })
 export class ProductsPage implements OnInit {
   private readonly api = inject(Api);
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
 
   protected readonly rows = signal<ProductRow[]>([]);
   protected readonly loading = signal(true);
@@ -47,11 +46,6 @@ export class ProductsPage implements OnInit {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  async logOut(): Promise<void> {
-    await this.auth.logout();
-    await this.router.navigateByUrl('/login');
   }
 }
 
@@ -83,12 +77,4 @@ export function buildRows(products: ProductResponse[], categories: CategoryRespo
     });
   }
   return rows;
-}
-
-/** The generated models mark every field optional, so a missing one is shown as empty text. */
-function textOrEmpty(value: string | undefined): string {
-  if (value === undefined) {
-    return '';
-  }
-  return value;
 }

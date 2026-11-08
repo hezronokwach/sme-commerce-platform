@@ -1,7 +1,7 @@
 <main class="products">
   <header>
     <h1>Products</h1>
-    <button type="button" (click)="logOut()">Log out</button>
+    <a class="button" routerLink="/products/new">Add product</a>
   </header>
 
   @if (loading()) {
@@ -24,7 +24,7 @@
         <!-- One row per product. "track" tells Angular which row is which when the list changes. -->
         @for (row of rows(); track row.id) {
           <tr>
-            <td>{{ row.name }}</td>
+            <td><a [routerLink]="['/products', row.id]">{{ row.name }}</a></td>
             <td class="price">{{ row.price }}</td>
             <td>{{ row.categoryName }}</td>
             <td>{{ row.status }}</td>
