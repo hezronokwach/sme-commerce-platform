@@ -2,4 +2,8 @@
 |===
 |Base package
 |`com.hezron.smecommerce.payments`
+|Spring components
+|_Services_
+
+* `c.h.s.p.PaymentsApi` (via `c.h.s.p.internal.application.PaymentService`)
 |===
