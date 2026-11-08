@@ -39,5 +39,9 @@ export type { StaffList$Params as StaffList$Params } from './fn/staff/staff-list
 export { staffList as staffList } from './fn/staff/staff-list';
 export type { StaffGet$Params as StaffGet$Params } from './fn/staff/staff-get';
 export { staffGet as staffGet } from './fn/staff/staff-get';
+export type { AdminOrderList$Params as AdminOrderList$Params } from './fn/admin-order/admin-order-list';
+export { adminOrderList as adminOrderList } from './fn/admin-order/admin-order-list';
+export type { AdminOrderGet$Params as AdminOrderGet$Params } from './fn/admin-order/admin-order-get';
+export { adminOrderGet as adminOrderGet } from './fn/admin-order/admin-order-get';
 export type { AdminMe$Params as AdminMe$Params } from './fn/admin/admin-me';
 export { adminMe as adminMe } from './fn/admin/admin-me';
