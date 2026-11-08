@@ -3,8 +3,12 @@
 |Base package
 |`com.hezron.smecommerce.ordering`
 |Bean references
-|* `c.h.s.t.TenantApi` (in Tenant)
+|* `c.h.s.i.InventoryApi` (in Inventory)
+* `c.h.s.t.TenantApi` (in Tenant)
 * `c.h.s.c.CatalogApi` (in Catalog)
 * `c.h.s.i.IdentityApi` (in Identity)
-* `c.h.s.i.InventoryApi` (in Inventory)
+* `c.h.s.p.PaymentsApi` (in Payments)
+|Events listened to
+|* `c.h.s.p.PaymentFailedEvent` (async) 
+* `c.h.s.p.PaymentSucceededEvent` (async) 
 |===

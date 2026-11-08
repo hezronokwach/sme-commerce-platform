@@ -13,10 +13,6 @@ include::module-audit.adoc[]
 plantuml::module-notification.puml[,,format=svg]
 include::module-notification.adoc[]
 
-== Payments
-plantuml::module-payments.puml[,,format=svg]
-include::module-payments.adoc[]
-
 == Shared Kernel
 plantuml::module-shared.puml[,,format=svg]
 include::module-shared.adoc[]
@@ -24,6 +20,10 @@ include::module-shared.adoc[]
 == Catalog
 plantuml::module-catalog.puml[,,format=svg]
 include::module-catalog.adoc[]
+
+== Payments
+plantuml::module-payments.puml[,,format=svg]
+include::module-payments.adoc[]
 
 == Tenant
 plantuml::module-tenant.puml[,,format=svg]

@@ -15,6 +15,9 @@ import com.hezron.smecommerce.ordering.internal.persistence.OrderLineRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryRepository;
+import com.hezron.smecommerce.payments.PaymentProviderName;
+import com.hezron.smecommerce.payments.PaymentsApi;
+import com.hezron.smecommerce.payments.RequestPaymentCommand;
 import com.hezron.smecommerce.shared.PhoneNumber;
 import com.hezron.smecommerce.shared.TenantId;
 import com.hezron.smecommerce.tenant.TenantApi;
@@ -39,9 +42,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Placing an order from the storefront (Guide 4.1, workflow W6 steps 1 to 5). It uses four other modules,
- * each only through its public API: tenant (which shop), catalog (prices), identity (the customer) and
- * inventory (holding the stock).
+ * Placing an order from the storefront (Guide 4.1, workflow W6 steps 1 to 5). It uses five other modules,
+ * each only through its public API: tenant (which shop), catalog (prices), identity (the customer),
+ * inventory (holding the stock) and payments (asking for the money).
  */
 @Service
 public class PlaceOrderService {
@@ -56,6 +59,7 @@ public class PlaceOrderService {
     private final CatalogApi catalogApi;
     private final IdentityApi identityApi;
     private final InventoryApi inventoryApi;
+    private final PaymentsApi paymentsApi;
     private final OrderNumberService orderNumbers;
     private final OrderRepository orders;
     private final OrderLineRepository orderLines;
@@ -63,12 +67,13 @@ public class PlaceOrderService {
     private final ApplicationEventPublisher events;
 
     PlaceOrderService(TenantApi tenantApi, CatalogApi catalogApi, IdentityApi identityApi, InventoryApi inventoryApi,
-            OrderNumberService orderNumbers, OrderRepository orders, OrderLineRepository orderLines,
-            OrderStatusHistoryRepository history, ApplicationEventPublisher events) {
+            PaymentsApi paymentsApi, OrderNumberService orderNumbers, OrderRepository orders,
+            OrderLineRepository orderLines, OrderStatusHistoryRepository history, ApplicationEventPublisher events) {
         this.tenantApi = tenantApi;
         this.catalogApi = catalogApi;
         this.identityApi = identityApi;
         this.inventoryApi = inventoryApi;
+        this.paymentsApi = paymentsApi;
         this.orderNumbers = orderNumbers;
         this.orders = orders;
         this.orderLines = orderLines;
@@ -123,9 +128,14 @@ public class PlaceOrderService {
         // 6. Hold the stock. Not enough? InsufficientStockException rolls back everything above.
         inventoryApi.reserve(tenantId, order.getId(), reservationLines(command.lines()));
 
-        // TODO(payments issue): payments.requestPayment(...) here, in the same transaction (Guide 4.1).
+        // 7. Ask for the money. Payments only saves the attempt here, in this same transaction; it asks
+        //    the provider (PIN prompt on the phone) after we commit, so a rolled-back order never
+        //    charges anyone. The two PaymentMethod/PaymentProviderName enums share their names.
+        PaymentProviderName provider = PaymentProviderName.valueOf(command.paymentMethod().name());
+        paymentsApi.requestPayment(new RequestPaymentCommand(tenantId, order.getId(), orderNumber, totalMinor,
+                currency, provider, phone.value()));
 
-        // 7. Tell the rest of the system (notification will show it in the admin's live list).
+        // 8. Tell the rest of the system (notification will show it in the admin's live list).
         events.publishEvent(new OrderPlacedEvent(tenantId, order.getId(), orderNumber, totalMinor, currency));
 
         return new PlaceOrderResult(order.getId(), orderNumber, accessToken, order.getStatus(), totalMinor,
