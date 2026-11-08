@@ -1,0 +1,35 @@
+<main class="page">
+  <h1>Settings</h1>
+
+  <h2>Staff</h2>
+  <p class="hint">Everyone who can log in to this shop's admin.</p>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last login</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>{{ row.fullName }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ row.role }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.lastLogin }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</main>

@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { messageFrom } from '../shared/error-message';
 
 /** The login form at /login. On success it opens the product list. */
 @Component({
@@ -32,26 +32,10 @@ export class LoginPage {
       await this.auth.login(this.email, this.password);
       await this.router.navigateByUrl('/products');
     } catch (error) {
-      this.errorMessage.set(messageFrom(error));
+      this.errorMessage.set(messageFrom(error, 'Login failed. Please try again.'));
     } finally {
       this.busy.set(false);
     }
   }
 }
 
-/**
- * Every backend error has the same JSON shape (ADR 0006); its "detail" field is written for people,
- * e.g. "The email or password is incorrect.". Use it when it's there.
- */
-function messageFrom(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
-    if (error.status === 0) {
-      return 'The server cannot be reached. Is the backend running?';
-    }
-    const body = error.error;
-    if (body !== null && typeof body === 'object' && typeof body.detail === 'string') {
-      return body.detail;
-    }
-  }
-  return 'Login failed. Please try again.';
-}

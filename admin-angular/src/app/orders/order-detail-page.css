@@ -1,0 +1,85 @@
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pay-by {
+  border-left: 3px solid #d97706;
+  padding-left: 12px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 40px;
+  margin: 16px 0 24px;
+}
+
+.facts dt {
+  color: #555;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tfoot th {
+  border-bottom: none;
+}
+
+.money {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  /* "KES 1,200.29" stays on one line; the product name wraps instead. */
+  white-space: nowrap;
+}
+
+/* A vertical line with a dot per status change. */
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-left: 2px solid #ddd;
+}
+
+.timeline li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 16px 16px;
+}
+
+.timeline li::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+
+.when,
+.reason {
+  color: #555;
+}
+
+.error {
+  color: #b91c1c;
+}

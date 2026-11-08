@@ -1,0 +1,53 @@
+<main class="page">
+  <header>
+    <h1>Orders</h1>
+    <label>
+      Show
+      <!-- (ngModelChange) runs after ngModel has written the new choice into statusFilter. -->
+      <select name="status" [(ngModel)]="statusFilter" (ngModelChange)="filterChanged()">
+        <option value="">All orders</option>
+        @for (status of statuses; track status) {
+          <option [value]="status">{{ statusLabel(status) }}</option>
+        }
+      </select>
+    </label>
+  </header>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  } @else if (rows().length === 0) {
+    <p>No orders here yet.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th class="money">Total</th>
+          <th>Placed</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td><a [routerLink]="['/orders', row.id]">{{ row.orderNumber }}</a></td>
+            <td>{{ row.customerName }}</td>
+            <!-- The class lets each status have its own colour, e.g. status-PAID. -->
+            <td><span [class]="'status status-' + row.status">{{ row.statusLabel }}</span></td>
+            <td class="money">{{ row.total }}</td>
+            <td>{{ row.placedAt }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <nav class="pager" aria-label="Pages">
+      <button type="button" (click)="previousPage()" [disabled]="page() === 0">Previous</button>
+      <span>Page {{ page() + 1 }} of {{ totalPages() }} ({{ totalItems() }} orders)</span>
+      <button type="button" (click)="nextPage()" [disabled]="page() + 1 >= totalPages()">Next</button>
+    </nav>
+  }
+</main>

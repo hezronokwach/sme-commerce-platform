@@ -1,0 +1,23 @@
+.hint {
+  color: #555;
+}
+
+/* Scrolls inside its box on a phone instead of stretching the page. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+}
+
+.error {
+  color: #b91c1c;
+}

@@ -1,0 +1,46 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 480px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  padding: 6px 8px;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.secondary {
+  background: none;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.saved {
+  color: #15803d;
+}
+
+.conflict {
+  border: 1px solid #d97706;
+  padding: 8px 12px;
+}

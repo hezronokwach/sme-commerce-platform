@@ -1,0 +1,60 @@
+<section class="stock">
+  <h2>Stock</h2>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (loadMessage() !== null) {
+    <p>{{ loadMessage() }}</p>
+    <button type="button" (click)="load()">Try again</button>
+  } @else if (stock() !== null) {
+    <dl class="numbers">
+      <div>
+        <dt>In the shop</dt>
+        <dd>{{ stock()?.onHand }}</dd>
+      </div>
+      <div>
+        <!-- Held: in unpaid orders. They come back if the order expires or is cancelled. -->
+        <dt>Held for orders</dt>
+        <dd>{{ stock()?.reserved }}</dd>
+      </div>
+      <div>
+        <dt>Can be sold</dt>
+        <dd>{{ stock()?.available }}</dd>
+      </div>
+    </dl>
+
+    <form class="adjust" (ngSubmit)="adjust()">
+      <label>
+        Change
+        <input name="change" inputmode="numeric" placeholder="20 or -3" [(ngModel)]="changeText" />
+      </label>
+
+      <label>
+        Reason
+        <select name="reason" [(ngModel)]="reason">
+          <option value="RESTOCK">Delivery (restock)</option>
+          <option value="SALE">Sold in the shop</option>
+          <option value="RETURN">Customer return</option>
+          <option value="ADJUSTMENT">Count correction</option>
+        </select>
+      </label>
+
+      <label>
+        Note (optional)
+        <input name="note" maxlength="60" [(ngModel)]="note" />
+      </label>
+
+      <button type="submit" [disabled]="saving()">
+        @if (saving()) {
+          Saving…
+        } @else {
+          Change stock
+        }
+      </button>
+    </form>
+
+    @if (errorMessage() !== null) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+  }
+</section>
