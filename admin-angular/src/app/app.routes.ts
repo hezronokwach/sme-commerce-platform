@@ -3,6 +3,7 @@ import { authGuard } from './auth/auth.guard';
 import { ownerGuard } from './auth/owner.guard';
 import { AdminLayout } from './layout/admin-layout';
 import { LoginPage } from './login/login-page';
+import { ProductFormPage } from './products/product-form-page';
 import { ProductsPage } from './products/products-page';
 import { SettingsPage } from './settings/settings-page';
 
@@ -18,6 +19,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'products', component: ProductsPage },
+      // 'new' must come before ':productId', or the router would treat "new" as a product id.
+      { path: 'products/new', component: ProductFormPage },
+      { path: 'products/:productId', component: ProductFormPage },
       // Both guards run: authGuard (from the parent) first, then ownerGuard.
       { path: 'settings', component: SettingsPage, canActivate: [ownerGuard] },
       // The bare address opens the products.

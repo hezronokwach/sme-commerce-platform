@@ -1,0 +1,82 @@
+<main class="page">
+  <p><a routerLink="/products">← All products</a></p>
+
+  @if (isNew()) {
+    <h1>Add product</h1>
+  } @else {
+    <h1>Edit product</h1>
+  }
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else {
+    <form class="form" (ngSubmit)="save()">
+      <label>
+        Name
+        <input name="name" required maxlength="120" [(ngModel)]="name" />
+      </label>
+
+      <label>
+        Price (KES)
+        <!-- type="text", not "number": a number input turns "1,200" into nothing and accepts "1e3". -->
+        <input name="price" inputmode="decimal" placeholder="e.g. 49.50" required [(ngModel)]="priceText" />
+      </label>
+
+      <label>
+        Category
+        <select name="category" [(ngModel)]="categoryId">
+          <option value="">No category</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Status
+        <select name="status" [(ngModel)]="status">
+          <option value="DRAFT">Draft (hidden from customers)</option>
+          <option value="ACTIVE">Active (on sale)</option>
+          @if (savedStatus() === 'ARCHIVED') {
+            <option value="ARCHIVED">Archived</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Description
+        <textarea name="description" rows="4" maxlength="5000" [(ngModel)]="description"></textarea>
+      </label>
+
+      @if (conflict()) {
+        <div class="conflict" role="alert">
+          <p>Someone else changed this product while you were editing it, so your change was not saved.</p>
+          <button type="button" (click)="load()">Load their version</button>
+        </div>
+      }
+      @if (errorMessage() !== null) {
+        <p class="error" role="alert">{{ errorMessage() }}</p>
+      }
+      @if (savedMessage() !== null) {
+        <p class="saved" role="status">{{ savedMessage() }}</p>
+      }
+
+      <div class="buttons">
+        <button type="submit" [disabled]="saving()">
+          @if (saving()) {
+            Saving…
+          } @else {
+            Save
+          }
+        </button>
+        @if (!isNew() && savedStatus() !== 'ARCHIVED') {
+          <button type="button" class="secondary" (click)="archive()">Archive</button>
+        }
+      </div>
+    </form>
+
+    @if (productId !== null) {
+      <app-stock-section [productId]="productId" />
+    }
+  }
+</main>
