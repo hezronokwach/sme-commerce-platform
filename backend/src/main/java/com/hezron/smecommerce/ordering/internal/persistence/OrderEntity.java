@@ -155,7 +155,12 @@ public class OrderEntity implements Persistable<UUID> {
         if (status != OrderStatus.PENDING_PAYMENT && status != OrderStatus.EXPIRED) {
             throw new IllegalOrderTransitionException(status, OrderStatus.PAID);
         }
-        return moveTo(OrderStatus.PAID, "Payment succeeded, receipt " + receiptNumber, ActorType.SYSTEM, null);
+        String reason = "Payment succeeded, receipt " + receiptNumber;
+        if (status == OrderStatus.EXPIRED) {
+            // The stock hold ended with the expiry, so the goods may have been sold to someone else.
+            reason = "Paid after the time limit, receipt " + receiptNumber + ": check the stock by hand";
+        }
+        return moveTo(OrderStatus.PAID, reason, ActorType.SYSTEM, null);
     }
 
     /** Only before payment. A paid order is refunded, not cancelled (a later feature). */
