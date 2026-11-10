@@ -17,10 +17,23 @@ top to bottom direction
 
 System_Boundary("SMECommerce_boundary", "SME Commerce", $tags="") {
   Container_Boundary("SMECommerce.SMECommerce_boundary", "SME Commerce", $tags="") {
+    Component(SMECommerce.SMECommerce.Ordering, "Ordering", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.Notification, "Notification", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.SharedKernel, "Shared Kernel", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.Payments, "Payments", $techn="Module", $descr="", $tags="", $link="")
   }
 
 }
+
+Rel(SMECommerce.SMECommerce.Notification, SMECommerce.SMECommerce.Ordering, "listens to", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Notification, SMECommerce.SMECommerce.Payments, "listens to", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Notification, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Notification, SMECommerce.SMECommerce.Ordering, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Notification, SMECommerce.SMECommerce.Payments, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Payments, "listens to", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Ordering, SMECommerce.SMECommerce.Payments, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Payments, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

@@ -1,12 +1,15 @@
 package com.hezron.smecommerce.payments.internal.application;
 
 import com.hezron.smecommerce.payments.PaymentInProgressException;
+import com.hezron.smecommerce.payments.PaymentStatusView;
 import com.hezron.smecommerce.payments.PaymentsApi;
 import com.hezron.smecommerce.payments.RequestPaymentCommand;
 import com.hezron.smecommerce.payments.internal.domain.PaymentStatus;
 import com.hezron.smecommerce.payments.internal.persistence.PaymentEntity;
 import com.hezron.smecommerce.payments.internal.persistence.PaymentRepository;
+import com.hezron.smecommerce.shared.TenantId;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -56,6 +59,17 @@ class PaymentService implements PaymentsApi {
         // Not the provider call itself: that happens after commit, in PaymentRequestedListener.
         events.publishEvent(new PaymentRequestedEvent(tenantId, payment.getId(), command.orderNumber()));
         return payment.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PaymentStatusView> findLatestPayment(TenantId tenantId, UUID orderId) {
+        List<PaymentEntity> attempts = payments.findAllByTenantIdAndOrderIdOrderByCreatedAtAsc(tenantId.value(), orderId);
+        if (attempts.isEmpty()) {
+            return Optional.empty();
+        }
+        PaymentEntity newest = attempts.get(attempts.size() - 1);
+        return Optional.of(new PaymentStatusView(newest.getStatus().name(), newest.getFailureReason()));
     }
 
 }

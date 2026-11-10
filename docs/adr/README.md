@@ -13,3 +13,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0007](0007-groq-as-the-llm-provider.md) | Groq is the LLM provider for the assistant | Accepted |
 | [0008](0008-reserve-stock-with-conditional-updates.md) | Stock is reserved with one conditional UPDATE per line | Accepted |
 | [0009](0009-events-delivered-at-least-once.md) | Events between modules are delivered at least once | Accepted |
+| [0010](0010-live-order-status-with-sse-and-stream-tickets.md) | Live order status over SSE, opened with one-time stream tickets | Accepted |

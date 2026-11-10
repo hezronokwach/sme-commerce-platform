@@ -2,9 +2,13 @@
 |===
 |Base package
 |`com.hezron.smecommerce.ordering`
+|Spring components
+|_Services_
+
+* `c.h.s.o.OrderingApi` (via `c.h.s.o.internal.application.OrderLookupService`)
 |Bean references
-|* `c.h.s.i.InventoryApi` (in Inventory)
-* `c.h.s.t.TenantApi` (in Tenant)
+|* `c.h.s.t.TenantApi` (in Tenant)
+* `c.h.s.i.InventoryApi` (in Inventory)
 * `c.h.s.c.CatalogApi` (in Catalog)
 * `c.h.s.i.IdentityApi` (in Identity)
 * `c.h.s.p.PaymentsApi` (in Payments)

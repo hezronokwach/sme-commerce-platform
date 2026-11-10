@@ -4,6 +4,7 @@
 export type { AdjustStockRequest } from './models/adjust-stock-request';
 export type { CategoryResponse } from './models/category-response';
 export type { CreateProductRequest } from './models/create-product-request';
+export type { CustomerStreamTicketRequest } from './models/customer-stream-ticket-request';
 export type { LineRequest } from './models/line-request';
 export type { LineRow } from './models/line-row';
 export type { LoginRequest } from './models/login-request';
@@ -18,8 +19,10 @@ export type { SaveCategoryRequest } from './models/save-category-request';
 export type { ShopProfileResponse } from './models/shop-profile-response';
 export type { SignUpRequest } from './models/sign-up-request';
 export type { SignUpResponse } from './models/sign-up-response';
+export type { SseEmitter } from './models/sse-emitter';
 export type { StaffResponse } from './models/staff-response';
 export type { StatusChangeRow } from './models/status-change-row';
 export type { StockResponse } from './models/stock-response';
+export type { StreamTicketResponse } from './models/stream-ticket-response';
 export type { TokenResponse } from './models/token-response';
 export type { UpdateProductRequest } from './models/update-product-request';

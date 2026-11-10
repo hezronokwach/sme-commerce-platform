@@ -1,5 +1,7 @@
 package com.hezron.smecommerce.payments;
 
+import com.hezron.smecommerce.shared.TenantId;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -20,5 +22,8 @@ public interface PaymentsApi {
      * @throws PaymentInProgressException if the order already has a live attempt
      */
     UUID requestPayment(RequestPaymentCommand command);
+
+    /** The order's newest payment attempt, or empty if none was made yet (or it's another shop's order). */
+    Optional<PaymentStatusView> findLatestPayment(TenantId tenantId, UUID orderId);
 
 }
