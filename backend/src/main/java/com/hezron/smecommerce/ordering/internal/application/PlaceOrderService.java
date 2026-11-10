@@ -14,24 +14,17 @@ import com.hezron.smecommerce.ordering.internal.persistence.OrderLineEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderLineRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryEntity;
-import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryRepository;
 import com.hezron.smecommerce.payments.PaymentProviderName;
 import com.hezron.smecommerce.payments.PaymentsApi;
 import com.hezron.smecommerce.payments.RequestPaymentCommand;
 import com.hezron.smecommerce.shared.PhoneNumber;
 import com.hezron.smecommerce.shared.TenantId;
 import com.hezron.smecommerce.tenant.TenantApi;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,9 +45,6 @@ public class PlaceOrderService {
     /** How long the customer has to pay. Inventory holds the stock for the same time. */
     static final Duration TIME_TO_PAY = Duration.ofMinutes(15);
 
-    private static final int ACCESS_TOKEN_BYTES = 32;
-    private static final SecureRandom RANDOM = new SecureRandom();
-
     private final TenantApi tenantApi;
     private final CatalogApi catalogApi;
     private final IdentityApi identityApi;
@@ -63,12 +53,12 @@ public class PlaceOrderService {
     private final OrderNumberService orderNumbers;
     private final OrderRepository orders;
     private final OrderLineRepository orderLines;
-    private final OrderStatusHistoryRepository history;
+    private final OrderStatusRecorder statusRecorder;
     private final ApplicationEventPublisher events;
 
     PlaceOrderService(TenantApi tenantApi, CatalogApi catalogApi, IdentityApi identityApi, InventoryApi inventoryApi,
             PaymentsApi paymentsApi, OrderNumberService orderNumbers, OrderRepository orders,
-            OrderLineRepository orderLines, OrderStatusHistoryRepository history, ApplicationEventPublisher events) {
+            OrderLineRepository orderLines, OrderStatusRecorder statusRecorder, ApplicationEventPublisher events) {
         this.tenantApi = tenantApi;
         this.catalogApi = catalogApi;
         this.identityApi = identityApi;
@@ -77,7 +67,7 @@ public class PlaceOrderService {
         this.orderNumbers = orderNumbers;
         this.orders = orders;
         this.orderLines = orderLines;
-        this.history = history;
+        this.statusRecorder = statusRecorder;
         this.events = events;
     }
 
@@ -111,19 +101,19 @@ public class PlaceOrderService {
 
         // 5. The order, its lines and its first two history rows.
         String orderNumber = orderNumbers.nextOrderNumber(tenant, shopSlug.strip().toLowerCase(Locale.ROOT));
-        String accessToken = newAccessToken();
+        String accessToken = OrderAccessTokens.newToken();
         long totalMinor = totalOf(command.lines(), prices);
         String currency = currencyOf(prices);
 
         OrderEntity order = OrderEntity.newOrder(tenant, orderNumber, customerId, customerName, phone.value(),
-                command.paymentMethod(), totalMinor, currency, sha256Hex(accessToken));
+                command.paymentMethod(), totalMinor, currency, OrderAccessTokens.hash(accessToken));
         orders.saveAndFlush(order);
-        history.save(OrderStatusHistoryEntity.newEntry(tenant, order.getId(), null, OrderStatus.CREATED,
+        statusRecorder.record(order, OrderStatusHistoryEntity.newEntry(tenant, order.getId(), null, OrderStatus.CREATED,
                 "Order placed", ActorType.CUSTOMER, customerId));
         saveLines(order, command.lines(), prices);
 
         Instant expiresAt = Instant.now().plus(TIME_TO_PAY);
-        history.save(order.placeAwaitingPayment(expiresAt));
+        statusRecorder.record(order, order.placeAwaitingPayment(expiresAt));
 
         // 6. Hold the stock. Not enough? InsufficientStockException rolls back everything above.
         inventoryApi.reserve(tenantId, order.getId(), reservationLines(command.lines()));
@@ -204,24 +194,6 @@ public class PlaceOrderService {
             reservation.add(new ReservationLine(line.productId(), line.quantity()));
         }
         return reservation;
-    }
-
-    /** 32 random bytes as URL-safe text: the private link to the order. */
-    private static String newAccessToken() {
-        byte[] bytes = new byte[ACCESS_TOKEN_BYTES];
-        RANDOM.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-
-    /** Only this hash is stored, so a leaked database can't be used to open anyone's order. */
-    private static String sha256Hex(String value) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            // Every Java runtime must ship SHA-256, so this can't happen.
-            throw new IllegalStateException(e);
-        }
     }
 
 }

@@ -18,6 +18,9 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
     /** {@code WHERE id = ? AND tenant_id = ?}: empty if the order belongs to another shop. */
     Optional<OrderEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
+    /** An order by its readable number, such as MM-000123, within one shop. */
+    Optional<OrderEntity> findByTenantIdAndOrderNumber(UUID tenantId, String orderNumber);
+
     /** One page of the shop's orders. */
     Page<OrderEntity> findAllByTenantId(UUID tenantId, Pageable pageable);
 

@@ -5,7 +5,6 @@ import com.hezron.smecommerce.ordering.internal.domain.ActorType;
 import com.hezron.smecommerce.ordering.internal.domain.OrderStatus;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderRepository;
-import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryRepository;
 import com.hezron.smecommerce.payments.PaymentFailedEvent;
 import com.hezron.smecommerce.payments.PaymentSucceededEvent;
 import com.hezron.smecommerce.shared.TenantId;
@@ -31,12 +30,12 @@ class PaymentResultListener {
     private static final Logger log = LoggerFactory.getLogger(PaymentResultListener.class);
 
     private final OrderRepository orders;
-    private final OrderStatusHistoryRepository history;
+    private final OrderStatusRecorder statusRecorder;
     private final InventoryApi inventoryApi;
 
-    PaymentResultListener(OrderRepository orders, OrderStatusHistoryRepository history, InventoryApi inventoryApi) {
+    PaymentResultListener(OrderRepository orders, OrderStatusRecorder statusRecorder, InventoryApi inventoryApi) {
         this.orders = orders;
-        this.history = history;
+        this.statusRecorder = statusRecorder;
         this.inventoryApi = inventoryApi;
     }
 
@@ -61,7 +60,7 @@ class PaymentResultListener {
 
         boolean wasExpired = order.getStatus() == OrderStatus.EXPIRED;
         // markPaid's history row says "check the stock by hand" when the order had expired.
-        history.save(order.markPaid(event.receiptNumber()));
+        statusRecorder.record(order, order.markPaid(event.receiptNumber()));
 
         // After expiry the hold was already released (someone else may have bought the stock since),
         // so there is nothing to confirm. Otherwise the held stock now leaves the shelf for good.
@@ -88,7 +87,7 @@ class PaymentResultListener {
             return;
         }
 
-        history.save(order.cancel("Payment failed: " + event.reason(), ActorType.SYSTEM, null));
+        statusRecorder.record(order, order.cancel("Payment failed: " + event.reason(), ActorType.SYSTEM, null));
         // The held stock goes back on sale.
         inventoryApi.release(TenantId.of(order.getTenantId()), order.getId());
     }
