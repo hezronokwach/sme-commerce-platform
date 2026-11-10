@@ -201,7 +201,52 @@ class OrderToPaidTests {
         assertThat(orderStatus(orderId)).isEqualTo("PENDING_PAYMENT");
     }
 
+    @Test
+    void everyStepOfThePaymentFlowIsRecordedInTheEventRegistry() throws Exception {
+        String orderId = placeOrder(shop, sukuma, 1, "0712345670", "FAKE");
+        waitForOrderStatus(orderId, "PAID");
+        String paymentId = newestPaymentColumn(orderId, "id");
+
+        // "Ask the provider" uses @TransactionalEventListener, not @ApplicationModuleListener (see
+        // PaymentRequestedListener); it is recorded all the same, so a crash can't lose it either.
+        waitForRegistryRow("PaymentRequestedEvent", paymentId, "COMPLETED");
+        waitForRegistryRow("PaymentSucceededEvent", paymentId, "COMPLETED");
+    }
+
+    @Test
+    void aPaymentSucceededEventDeliveredTwiceIsHandledOnce() throws Exception {
+        String orderId = placeOrder(shop, sukuma, 2, "0712345670", "FAKE");
+        waitForOrderStatus(orderId, "PAID");
+        waitForStock(sukuma, STOCK - 2, 0);
+
+        // At-least-once delivery: a retry or restart can deliver the same event again.
+        String paymentId = newestPaymentColumn(orderId, "id");
+        publishInTransaction(new PaymentSucceededEvent(TenantId.of(UUID.fromString(shop.tenantId())),
+                UUID.fromString(orderId), UUID.fromString(paymentId), "FK-AGAIN", 10000));
+        Thread.sleep(1_000);
+
+        // Ordering checks the order first: already PAID, so nothing happens a second time.
+        assertThat(historyRowsTo(orderId, "PAID")).isEqualTo(1);
+        assertThat(stock(sukuma)).isEqualTo(new Stock(STOCK - 2, 0));
+    }
+
     // --- helpers ---------------------------------------------------------------------------------
+
+    /** Waits until the registry row of one event (found by an id inside its JSON) has this status. */
+    private void waitForRegistryRow(String eventType, String idInEvent, String expected) throws InterruptedException {
+        long giveUpAt = System.currentTimeMillis() + WAIT_AT_MOST_MILLIS;
+        List<String> statuses = List.of();
+        while (System.currentTimeMillis() < giveUpAt) {
+            statuses = jdbc.queryForList(
+                    "SELECT status FROM event_publication WHERE event_type LIKE ? AND serialized_event LIKE ?",
+                    String.class, "%" + eventType, "%" + idInEvent + "%");
+            if (statuses.size() == 1 && expected.equals(statuses.get(0))) {
+                return;
+            }
+            Thread.sleep(100);
+        }
+        throw new AssertionError(eventType + " for " + idInEvent + " never became " + expected + "; rows: " + statuses);
+    }
 
     /** A JSON callback in the fake provider's format, saying "success". */
     private static String successBody(String reference, long amountMinor) {
