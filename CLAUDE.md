@@ -31,7 +31,7 @@ Deploy: Render (backend + Postgres), Vercel (frontends).
 | --- | --- |
 | `backend/` | Spring Boot modulith (base package `com.hezron.smecommerce`), Maven wrapper, `compose.yaml` for local Postgres |
 | `admin-angular/` | Angular 22 admin for owners and staff (`npm start` proxies `/api` to the backend; Node 22.22.3+/24.15+) |
-| `storefront-react/` | React storefront for customers (not scaffolded yet) |
+| `storefront-react/` | React storefront for customers (Vite + React 19; `npm run dev` proxies `/api` to the backend) |
 | `infra/` | Deployment files shared across apps (Render Blueprint, full-stack Compose) |
 | `docs/` | Plan, architecture, database design, pseudocode guide |
 
