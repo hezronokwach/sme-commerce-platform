@@ -23,6 +23,7 @@ export type { SseEmitter } from './models/sse-emitter';
 export type { StaffResponse } from './models/staff-response';
 export type { StatusChangeRow } from './models/status-change-row';
 export type { StockResponse } from './models/stock-response';
+export type { StorefrontProductResponse } from './models/storefront-product-response';
 export type { StreamTicketResponse } from './models/stream-ticket-response';
 export type { TokenResponse } from './models/token-response';
 export type { UpdateProductRequest } from './models/update-product-request';

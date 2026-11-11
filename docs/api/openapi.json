@@ -521,6 +521,105 @@
         }
       }
     },
+    "/api/store/{slug}/products" : {
+      "get" : {
+        "tags" : [ "StorefrontCatalog" ],
+        "operationId" : "storefrontCatalogListProducts",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "categoryId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/StorefrontProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/store/{slug}/products/{productSlug}" : {
+      "get" : {
+        "tags" : [ "StorefrontCatalog" ],
+        "operationId" : "storefrontCatalogGetProduct",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StorefrontProductResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/store/{slug}/categories" : {
+      "get" : {
+        "tags" : [ "StorefrontCatalog" ],
+        "operationId" : "storefrontCatalogListCategories",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CategoryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/store/order-stream" : {
       "get" : {
         "tags" : [ "OrderStatusStream" ],
@@ -1127,6 +1226,38 @@
             "type" : "string"
           },
           "tagline" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StorefrontProductResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "categoryId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "priceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "imageUrl" : {
             "type" : "string"
           }
         }

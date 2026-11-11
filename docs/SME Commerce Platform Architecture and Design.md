@@ -195,6 +195,7 @@ Allowed dependencies at a glance:
 | --- | --- | --- |
 | ordering | catalog, inventory, identity, tenant, payments | tenant, payments |
 | payments | tenant | nothing outside payments |
+| catalog | tenant (ADR 0011) | nothing |
 | inventory | nothing | catalog |
 | notification | nothing | ordering, payments |
 | assistant | catalog | catalog |

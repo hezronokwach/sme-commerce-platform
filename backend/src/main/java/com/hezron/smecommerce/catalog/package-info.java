@@ -6,7 +6,7 @@
  */
 @ApplicationModule(
         displayName = "Catalog",
-        allowedDependencies = { "shared", "audit" }
+        allowedDependencies = { "shared", "audit", "tenant" }
 )
 package com.hezron.smecommerce.catalog;
 

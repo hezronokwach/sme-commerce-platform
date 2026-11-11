@@ -31,7 +31,7 @@ Deploy: Render (backend + Postgres), Vercel (frontends).
 | --- | --- |
 | `backend/` | Spring Boot modulith (base package `com.hezron.smecommerce`), Maven wrapper, `compose.yaml` for local Postgres |
 | `admin-angular/` | Angular 22 admin for owners and staff (`npm start` proxies `/api` to the backend; Node 22.22.3+/24.15+) |
-| `storefront-react/` | React storefront for customers (not scaffolded yet) |
+| `storefront-react/` | React storefront for customers (Vite + React 19; `npm run dev` proxies `/api` to the backend) |
 | `infra/` | Deployment files shared across apps (Render Blueprint, full-stack Compose) |
 | `docs/` | Plan, architecture, database design, pseudocode guide |
 
@@ -39,7 +39,7 @@ Deploy: Render (backend + Postgres), Vercel (frontends).
 
 - Modules: tenant, identity, catalog, inventory, ordering, payments, notification, assistant, audit, plus a tiny `shared` kernel (value types only, no logic).
 - Modules talk only via the public API in their base package or via events. Everything under `internal/` is private. No entities across boundaries, no cross-schema joins, no cycles.
-- Allowed calls: identity→tenant; ordering→catalog, inventory, identity, tenant, payments; payments→tenant; assistant→catalog. Inventory and assistant listen to catalog events; ordering listens to tenant and payments events; notification listens to ordering and payments. Payments never listens to OrderPlaced.
+- Allowed calls: identity→tenant; catalog→tenant (ADR 0011); ordering→catalog, inventory, identity, tenant, payments; payments→tenant; assistant→catalog. Inventory and assistant listen to catalog events; ordering listens to tenant and payments events; notification listens to ordering and payments. Payments never listens to OrderPlaced.
 - Every tenant-owned table has `tenant_id`; queries are filtered automatically. Cross-tenant tests are mandatory.
 - Money is integer minor units + currency code. Timestamps UTC `timestamptz`. Phones normalised to 2547XXXXXXXX.
 - Payment state UNKNOWN is real: never show "failed" when the truth is unknown. Callbacks are idempotent (unique provider reference).

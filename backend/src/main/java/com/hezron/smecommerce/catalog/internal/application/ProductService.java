@@ -28,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     /**
-     * Every shop sells in KES for now. The docs say a product copies its shop's currency, but catalog
-     * isn't allowed to call the tenant module, so this waits until shops can pick another currency.
+     * Every shop sells in KES for now. The docs say a product copies its shop's currency; that waits
+     * until shops can pick another currency (catalog may now ask tenant, ADR 0011).
      */
     private static final String SHOP_CURRENCY = "KES";
 
