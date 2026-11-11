@@ -17,6 +17,13 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
     /** {@code WHERE tenant_id = ? AND status = ? ORDER BY created_at DESC}. */
     List<ProductEntity> findAllByTenantIdAndStatusOrderByCreatedAtDesc(UUID tenantId, ProductStatus status);
 
+    /** {@code WHERE tenant_id = ? AND status = ? AND category_id = ? ORDER BY created_at DESC}. */
+    List<ProductEntity> findAllByTenantIdAndStatusAndCategoryIdOrderByCreatedAtDesc(UUID tenantId,
+            ProductStatus status, UUID categoryId);
+
+    /** {@code WHERE tenant_id = ? AND slug = ? AND status = ?}: one product page on the storefront. */
+    Optional<ProductEntity> findByTenantIdAndSlugAndStatus(UUID tenantId, String slug, ProductStatus status);
+
     /** {@code WHERE id = ? AND tenant_id = ?}: empty if the product belongs to another shop. */
     Optional<ProductEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
