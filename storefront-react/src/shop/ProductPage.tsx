@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { api } from '../api/client'
 import type { StoreProduct } from '../api/client'
+import { AddToCart } from '../cart/AddToCart'
 import { formatMoney } from '../money'
 import { ProductImage } from './ProductImage'
 import { useShop } from './shop-context'
@@ -88,6 +89,7 @@ function LoadedProduct({ slug, productSlug }: { slug: string; productSlug: strin
       <h1>{product.name}</h1>
       <p className="product-price">{formatMoney(product.priceMinor ?? 0, product.currency ?? 'KES')}</p>
       {product.description && <p className="product-description">{product.description}</p>}
+      <AddToCart product={product} shopSlug={slug} />
     </article>
   )
 }

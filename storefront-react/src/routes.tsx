@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router'
+import { CartPage } from './cart/CartPage'
 import { NotFoundPage } from './NotFoundPage'
 import { ProductListPage } from './shop/ProductListPage'
 import { ProductPage } from './shop/ProductPage'
@@ -14,6 +15,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <ProductListPage /> },
       { path: 'p/:productSlug', element: <ProductPage /> },
+      { path: 'cart', element: <CartPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

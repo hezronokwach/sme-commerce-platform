@@ -3,6 +3,8 @@ import type { CSSProperties } from 'react'
 import { Link, Outlet, useParams } from 'react-router'
 import { api } from '../api/client'
 import type { ShopProfile } from '../api/client'
+import { CartProvider } from '../cart/CartProvider'
+import { CartBadge } from '../cart/CartBadge'
 import type { ShopContext } from './shop-context'
 
 // Workflow W5 steps 2 and 3: the shop comes from the address (/s/mamamboga). Its profile is loaded
@@ -83,18 +85,23 @@ function LoadedShop({ slug }: { slug: string }) {
   const shop = state.shop
   const context: ShopContext = { slug, shop }
   return (
-    <div className="shop" style={shopColours(shop)}>
-      <header className="shop-header">
-        <Link to={`/s/${slug}`} className="shop-name">
-          {shop.logoUrl && <img src={shop.logoUrl} alt="" className="shop-logo" />}
-          <span>{shop.name}</span>
-        </Link>
-        {shop.tagline && <p className="shop-tagline">{shop.tagline}</p>}
-      </header>
-      <main>
-        <Outlet context={context} />
-      </main>
-    </div>
+    <CartProvider shopSlug={slug}>
+      <div className="shop" style={shopColours(shop)}>
+        <header className="shop-header">
+          <div className="shop-header-row">
+            <Link to={`/s/${slug}`} className="shop-name">
+              {shop.logoUrl && <img src={shop.logoUrl} alt="" className="shop-logo" />}
+              <span>{shop.name}</span>
+            </Link>
+            <CartBadge slug={slug} />
+          </div>
+          {shop.tagline && <p className="shop-tagline">{shop.tagline}</p>}
+        </header>
+        <main>
+          <Outlet context={context} />
+        </main>
+      </div>
+    </CartProvider>
   )
 }
 
