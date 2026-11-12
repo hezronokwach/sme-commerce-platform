@@ -5,7 +5,7 @@ import { cartTotalMinor, MAX_QUANTITY } from './cart'
 import type { CartLine } from './cart'
 import { useCart } from './cart-context'
 
-// /s/:slug/cart: what the customer is about to buy. Checkout comes with the next issue.
+// /s/:slug/cart: what the customer is about to buy, with the way to checkout.
 export function CartPage() {
   const { slug, shop } = useShop()
   const { lines, dispatch } = useCart()
@@ -47,10 +47,9 @@ export function CartPage() {
 
       <div className="cart-actions">
         <Link to={`/s/${slug}`}>Continue shopping</Link>
-        {/* Issue #19: checkout (name, phone, pay) and the live order page. */}
-        <button type="button" className="primary-button" disabled>
-          Checkout (coming soon)
-        </button>
+        <Link to={`/s/${slug}/checkout`} className="primary-button">
+          Checkout
+        </Link>
       </div>
     </>
   )

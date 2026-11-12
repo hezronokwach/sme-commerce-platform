@@ -1,6 +1,8 @@
 import type { RouteObject } from 'react-router'
 import { CartPage } from './cart/CartPage'
+import { CheckoutPage } from './checkout/CheckoutPage'
 import { NotFoundPage } from './NotFoundPage'
+import { OrderPage } from './orders/OrderPage'
 import { ProductListPage } from './shop/ProductListPage'
 import { ProductPage } from './shop/ProductPage'
 import { ShopLayout } from './shop/ShopLayout'
@@ -16,6 +18,8 @@ export const routes: RouteObject[] = [
       { index: true, element: <ProductListPage /> },
       { path: 'p/:productSlug', element: <ProductPage /> },
       { path: 'cart', element: <CartPage /> },
+      { path: 'checkout', element: <CheckoutPage /> },
+      { path: 'orders/:orderNumber', element: <OrderPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

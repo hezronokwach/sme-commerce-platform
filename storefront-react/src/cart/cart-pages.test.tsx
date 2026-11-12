@@ -51,7 +51,7 @@ describe('filling a cart', () => {
     expect(screen.getByText('Tomatoes')).toBeInTheDocument()
     // 2 × 50.00 + 1 × 30.00
     expect(screen.getByText('KES 130.00')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Checkout (coming soon)' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Checkout' })).toHaveAttribute('href', '/s/mamamboga/checkout')
   })
 
   it('keeps the cart after a reload, and another shop has its own empty cart', async () => {
