@@ -227,6 +227,42 @@
         }
       }
     },
+    "/api/store/{slug}/orders/{orderNumber}/payment-attempts" : {
+      "post" : {
+        "tags" : [ "StorefrontOrder" ],
+        "operationId" : "storefrontOrderTryPaymentAgain",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "orderNumber",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TryPaymentAgainRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        }
+      }
+    },
     "/api/auth/signup" : {
       "post" : {
         "tags" : [ "Auth" ],
@@ -584,6 +620,46 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/StorefrontProductResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/store/{slug}/orders/{orderNumber}" : {
+      "get" : {
+        "tags" : [ "StorefrontOrder" ],
+        "operationId" : "storefrontOrderGet",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "orderNumber",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "X-Order-Token",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerOrderResponse"
                 }
               }
             }
@@ -1039,6 +1115,17 @@
           }
         }
       },
+      "TryPaymentAgainRequest" : {
+        "type" : "object",
+        "properties" : {
+          "orderToken" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "orderToken" ]
+      },
       "SignUpRequest" : {
         "type" : "object",
         "properties" : {
@@ -1259,6 +1346,70 @@
           },
           "imageUrl" : {
             "type" : "string"
+          }
+        }
+      },
+      "CustomerOrderResponse" : {
+        "type" : "object",
+        "properties" : {
+          "orderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "currency" : {
+            "type" : "string"
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "phoneHint" : {
+            "type" : "string"
+          },
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/LineResponse"
+            }
+          },
+          "paymentStatus" : {
+            "type" : "string"
+          },
+          "paymentFailureReason" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LineResponse" : {
+        "type" : "object",
+        "properties" : {
+          "productName" : {
+            "type" : "string"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lineTotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

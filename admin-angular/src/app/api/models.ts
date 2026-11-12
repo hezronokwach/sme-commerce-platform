@@ -4,8 +4,10 @@
 export type { AdjustStockRequest } from './models/adjust-stock-request';
 export type { CategoryResponse } from './models/category-response';
 export type { CreateProductRequest } from './models/create-product-request';
+export type { CustomerOrderResponse } from './models/customer-order-response';
 export type { CustomerStreamTicketRequest } from './models/customer-stream-ticket-request';
 export type { LineRequest } from './models/line-request';
+export type { LineResponse } from './models/line-response';
 export type { LineRow } from './models/line-row';
 export type { LoginRequest } from './models/login-request';
 export type { MeResponse } from './models/me-response';
@@ -26,4 +28,5 @@ export type { StockResponse } from './models/stock-response';
 export type { StorefrontProductResponse } from './models/storefront-product-response';
 export type { StreamTicketResponse } from './models/stream-ticket-response';
 export type { TokenResponse } from './models/token-response';
+export type { TryPaymentAgainRequest } from './models/try-payment-again-request';
 export type { UpdateProductRequest } from './models/update-product-request';
