@@ -15,4 +15,10 @@ record StreamTicketResponse(String ticket, String streamUrl, long expiresInSecon
                 issued.expiresInSeconds());
     }
 
+    /** A ticket for the shop's live order feed, pointing at that stream instead. */
+    static StreamTicketResponse forShopFeed(IssuedTicket issued) {
+        return new StreamTicketResponse(issued.ticket(), "/api/admin/order-feed?ticket=" + issued.ticket(),
+                issued.expiresInSeconds());
+    }
+
 }

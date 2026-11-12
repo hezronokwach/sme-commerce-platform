@@ -19,15 +19,19 @@ public interface StreamTicketRepository extends JpaRepository<StreamTicketEntity
      * two UPDATEs one after the other, the first changes 1 row, the second finds used_at already set
      * and changes 0. So a ticket works exactly once, with no check-then-act gap in between.
      *
+     * <p>
+     * The scope is part of the WHERE too: a SHOP ticket can't open an order's stream, and an ORDER ticket
+     * can't open the shop feed. A ticket of the wrong kind isn't even used up.
+     *
      * @return 1 if the ticket was valid and is now used, 0 otherwise
      */
     @Modifying
     @Query(nativeQuery = true, value = """
             UPDATE notification.stream_tickets
             SET used_at = :now
-            WHERE ticket_hash = :ticketHash AND used_at IS NULL AND expires_at > :now
+            WHERE ticket_hash = :ticketHash AND scope = :scope AND used_at IS NULL AND expires_at > :now
             """)
-    int useUp(@Param("ticketHash") String ticketHash, @Param("now") Instant now);
+    int useUp(@Param("ticketHash") String ticketHash, @Param("scope") String scope, @Param("now") Instant now);
 
     /** For the daily clean-up. */
     @Modifying
