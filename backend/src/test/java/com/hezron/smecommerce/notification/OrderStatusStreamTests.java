@@ -77,6 +77,7 @@ class OrderStatusStreamTests {
 
         reader.waitForLineContaining("\"status\":\"PENDING_PAYMENT\"");
         reader.waitForLineContaining("Payment received. Thank you!");
+        reader.waitForLineContaining("\"paymentStatus\":\"SUCCEEDED\"");
         reader.waitForLineContaining("\"last\":true");
         // After the last message the server closes the stream.
         reader.waitUntilClosed();
@@ -89,9 +90,34 @@ class OrderStatusStreamTests {
         StreamReader reader = openStream(customerTicketUrl(order));
 
         reader.waitForLineContaining("Payment failed: You cancelled the payment on your phone. You can try again.");
+        // The page reads what happened from the data, not from the words.
+        reader.waitForLineContaining("\"paymentStatus\":\"FAILED\"");
         // Still open: the customer may pay again before the time limit.
         assertThat(reader.isClosed()).isFalse();
         assertThat(streams.countFor(UUID.fromString(order.orderId()))).isEqualTo(1);
+        reader.stop();
+    }
+
+    @Test
+    void afterTryAgainThePageSaysWaitingAgainThenHowTheNewAttemptEnded() throws Exception {
+        PlacedOrder order = placeOrder("0712345671"); // every attempt with this phone is cancelled
+        StreamReader reader = openStream(customerTicketUrl(order));
+        int firstFailure = reader.waitForLineContaining("\"paymentStatus\":\"FAILED\"", 0);
+
+        MvcTestResult again = mvc.post().uri("/api/store/" + shop.slug() + "/orders/" + order.orderNumber()
+                + "/payment-attempts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"orderToken": "%s"}
+                        """.formatted(order.accessToken()))
+                .exchange();
+        assertThat(again).hasStatus(HttpStatus.ACCEPTED);
+
+        // In this order, on the same open stream: waiting for the new PIN prompt, then its failure.
+        int waitingAgain = reader.waitForLineContaining("\"paymentStatus\":\"PENDING\"", firstFailure + 1);
+        reader.waitForLineContaining("\"paymentStatus\":\"FAILED\"", waitingAgain + 1);
+        assertThat(reader.lines().get(waitingAgain))
+                .contains("Waiting for payment. Check your phone and enter your PIN.");
         reader.stop();
     }
 
@@ -202,16 +228,22 @@ class OrderStatusStreamTests {
         }
 
         void waitForLineContaining(String text) throws InterruptedException {
+            waitForLineContaining(text, 0);
+        }
+
+        /** Waits for a line with the text at position fromIndex or later, and returns its position. */
+        int waitForLineContaining(String text, int fromIndex) throws InterruptedException {
             long giveUpAt = System.currentTimeMillis() + WAIT_AT_MOST_MILLIS;
             while (System.currentTimeMillis() < giveUpAt) {
-                for (String line : lines) {
-                    if (line.contains(text)) {
-                        return;
+                for (int i = fromIndex; i < lines.size(); i++) {
+                    if (lines.get(i).contains(text)) {
+                        return i;
                     }
                 }
                 Thread.sleep(50);
             }
-            throw new AssertionError("The stream never said: " + text + "\nIt said: " + lines);
+            throw new AssertionError("The stream never said (from line " + fromIndex + "): " + text
+                    + "\nIt said: " + lines);
         }
 
         void waitUntilClosed() throws InterruptedException {
