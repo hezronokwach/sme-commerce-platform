@@ -484,6 +484,24 @@
         }
       }
     },
+    "/api/admin/order-feed/ticket" : {
+      "post" : {
+        "tags" : [ "StreamTicket" ],
+        "operationId" : "streamTicketForShopFeed",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StreamTicketResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/categories" : {
       "get" : {
         "tags" : [ "Category" ],
@@ -862,6 +880,32 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/OrderDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/order-feed" : {
+      "get" : {
+        "tags" : [ "ShopFeed" ],
+        "operationId" : "shopFeedFeed",
+        "parameters" : [ {
+          "name" : "ticket",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SseEmitter"
                 }
               }
             }

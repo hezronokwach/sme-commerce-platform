@@ -6,7 +6,9 @@
 |* `c.h.s.o.OrderingApi` (in Ordering)
 * `c.h.s.p.PaymentsApi` (in Payments)
 |Events listened to
-|* `c.h.s.p.PaymentStartedEvent` (async) 
-* `c.h.s.o.OrderStatusChangedEvent` (async) 
+|* `c.h.s.o.OrderStatusChangedEvent` (async) 
 * `c.h.s.p.PaymentFailedEvent` (async) 
+* `c.h.s.p.PaymentStartedEvent` (async) 
+* `c.h.s.o.OrderPlacedEvent` (async) 
+* `c.h.s.o.OrderStatusChangedEvent` (async) 
 |===

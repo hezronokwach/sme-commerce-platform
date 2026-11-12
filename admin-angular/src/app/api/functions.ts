@@ -29,6 +29,8 @@ export type { StreamTicketForCustomer$Params as StreamTicketForCustomer$Params }
 export { streamTicketForCustomer as streamTicketForCustomer } from './fn/stream-ticket/stream-ticket-for-customer';
 export type { StreamTicketForStaff$Params as StreamTicketForStaff$Params } from './fn/stream-ticket/stream-ticket-for-staff';
 export { streamTicketForStaff as streamTicketForStaff } from './fn/stream-ticket/stream-ticket-for-staff';
+export type { StreamTicketForShopFeed$Params as StreamTicketForShopFeed$Params } from './fn/stream-ticket/stream-ticket-for-shop-feed';
+export { streamTicketForShopFeed as streamTicketForShopFeed } from './fn/stream-ticket/stream-ticket-for-shop-feed';
 export type { AuthSignUp$Params as AuthSignUp$Params } from './fn/auth/auth-sign-up';
 export { authSignUp as authSignUp } from './fn/auth/auth-sign-up';
 export type { AuthRefresh$Params as AuthRefresh$Params } from './fn/auth/auth-refresh';
@@ -59,5 +61,7 @@ export type { AdminOrderList$Params as AdminOrderList$Params } from './fn/admin-
 export { adminOrderList as adminOrderList } from './fn/admin-order/admin-order-list';
 export type { AdminOrderGet$Params as AdminOrderGet$Params } from './fn/admin-order/admin-order-get';
 export { adminOrderGet as adminOrderGet } from './fn/admin-order/admin-order-get';
+export type { ShopFeedFeed$Params as ShopFeedFeed$Params } from './fn/shop-feed/shop-feed-feed';
+export { shopFeedFeed as shopFeedFeed } from './fn/shop-feed/shop-feed-feed';
 export type { AdminMe$Params as AdminMe$Params } from './fn/admin/admin-me';
 export { adminMe as adminMe } from './fn/admin/admin-me';

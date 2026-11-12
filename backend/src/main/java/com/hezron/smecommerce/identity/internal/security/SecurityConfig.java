@@ -3,6 +3,7 @@ package com.hezron.smecommerce.identity.internal.security;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -60,6 +61,10 @@ class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         // Storefront is public; each endpoint finds its shop from the slug in the URL.
                         .requestMatchers("/api/store/**").permitAll()
+                        // The admin's live order feed (ADR 0012): the browser's EventSource can't send a
+                        // token, so a one-time SHOP ticket in the address proves who it is, and only staff
+                        // can get one. Just this GET; the ticket request itself needs a staff token below.
+                        .requestMatchers(HttpMethod.GET, "/api/admin/order-feed").permitAll()
                         // A valid token isn't enough: it must be a staff token (customer tokens will carry
                         // another role), so a storefront login can never open the admin API.
                         .requestMatchers("/api/admin/**").hasAnyRole("OWNER", "STAFF")
