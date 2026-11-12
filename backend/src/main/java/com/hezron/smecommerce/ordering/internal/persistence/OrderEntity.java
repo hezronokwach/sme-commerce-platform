@@ -187,6 +187,18 @@ public class OrderEntity implements Persistable<UUID> {
         return moveTo(OrderStatus.FULFILLED, "Handed over to the customer", ActorType.STAFF, staffId);
     }
 
+    /**
+     * Not a move: the order stays PENDING_PAYMENT while the customer tries paying again. The row only
+     * lets staff see each attempt in the order's history.
+     */
+    public OrderStatusHistoryEntity recordNewPaymentAttempt() {
+        if (status != OrderStatus.PENDING_PAYMENT) {
+            throw new IllegalOrderTransitionException(status, OrderStatus.PENDING_PAYMENT);
+        }
+        return OrderStatusHistoryEntity.newEntry(tenantId, id, status, status, "Customer tried paying again",
+                ActorType.CUSTOMER, null);
+    }
+
     /** Changes the status and returns the history row that records the change. */
     private OrderStatusHistoryEntity moveTo(OrderStatus to, String reason, ActorType actorType, UUID actorId) {
         OrderStatus from = this.status;

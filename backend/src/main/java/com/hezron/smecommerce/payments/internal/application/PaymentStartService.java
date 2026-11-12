@@ -2,6 +2,7 @@ package com.hezron.smecommerce.payments.internal.application;
 
 import com.hezron.smecommerce.payments.PaymentFailedEvent;
 import com.hezron.smecommerce.payments.PaymentProviderName;
+import com.hezron.smecommerce.payments.PaymentStartedEvent;
 import com.hezron.smecommerce.payments.internal.domain.PaymentStatus;
 import com.hezron.smecommerce.payments.internal.persistence.PaymentEntity;
 import com.hezron.smecommerce.payments.internal.persistence.PaymentRepository;
@@ -73,6 +74,8 @@ public class PaymentStartService {
 
         if (result.outcome() == StartResult.Outcome.ACCEPTED) {
             payment.markPending(result.providerReference(), Instant.now().plus(FIRST_CHECK_AFTER_ACCEPTED));
+            events.publishEvent(new PaymentStartedEvent(TenantId.of(tenantId), payment.getOrderId(),
+                    payment.getId(), PaymentStatus.PENDING.name()));
         } else if (result.outcome() == StartResult.Outcome.REJECTED) {
             payment.fail(result.reason(), null);
             // Retryable: a refused start (bad number, provider not set up) is worth another try.
@@ -80,6 +83,9 @@ public class PaymentStartService {
                     payment.getId(), result.reason(), true));
         } else {
             payment.markUnknown(Instant.now().plus(FIRST_CHECK_AFTER_UNKNOWN));
+            // We don't know whether the prompt reached the phone: "checking", never "failed".
+            events.publishEvent(new PaymentStartedEvent(TenantId.of(tenantId), payment.getOrderId(),
+                    payment.getId(), PaymentStatus.UNKNOWN.name()));
         }
     }
 

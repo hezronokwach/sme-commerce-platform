@@ -10,7 +10,7 @@ import type { components, paths } from './schema'
 // Where the backend is. In development it's this page's own address, and Vite's proxy passes '/api'
 // on to the backend (vite.config.ts). A deployed build sets VITE_API_BASE_URL to the backend's address.
 // The address must be absolute: fetch's Request refuses a bare '/api/...' outside a browser (tests).
-function backendAddress(): string {
+export function backendAddress(): string {
   const configured = import.meta.env.VITE_API_BASE_URL
   if (configured) {
     return configured

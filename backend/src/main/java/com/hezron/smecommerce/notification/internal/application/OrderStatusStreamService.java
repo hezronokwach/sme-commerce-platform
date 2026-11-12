@@ -61,7 +61,8 @@ public class OrderStatusStreamService {
             failureReason = payment.get().failureReason();
         }
         String message = StatusMessages.forStatus(order.status(), paymentStatus, failureReason);
-        return new StatusMessage(order.orderNumber(), order.status(), message, StatusMessages.isLast(order.status()));
+        return new StatusMessage(order.orderNumber(), order.status(), paymentStatus, message,
+                StatusMessages.isLast(order.status()));
     }
 
 }

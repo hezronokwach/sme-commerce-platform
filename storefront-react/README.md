@@ -1,7 +1,7 @@
 # Storefront (React)
 
-The shop customers see, at `/s/:slug` (for example `/s/mamamboga`): browse products, fill a cart.
-No login. Checkout and the live order page come with the next issue.
+The shop customers see, at `/s/:slug` (for example `/s/mamamboga`): browse products, fill a cart,
+check out with name and phone, and watch the payment live on the order page. No login.
 
 Vite + React 19 + TypeScript 6, React Router, Vitest + Testing Library. Node 22.12+ (CI uses 24).
 
@@ -42,9 +42,26 @@ it declares TypeScript 5 as its peer.
 | --- | --- |
 | `src/shop/` | `ShopLayout` (loads the shop, "Shop not found", the shop's colours), product list, product page |
 | `src/cart/` | The cart: logic and storage (`cart.ts`), provider, badge, "Add to cart", cart page |
-| `src/api/` | Generated types and the client |
+| `src/checkout/` | Checkout page, the phone check (same rules as the backend), which payment method to send |
+| `src/orders/` | The order page, the live stream watcher (`live-status.ts`), what to show (`order-view.ts`), saved order links |
+| `src/api/` | Generated types, the client, and `problem.ts` for reading error bodies |
 
 The cart is kept in `localStorage` under `cart:<shop slug>`, so two shops' carts never mix. Its
 prices are only for showing: at checkout the server prices the order again.
+
+## Checkout and the live order page
+
+- **Payment method:** `VITE_PAYMENT_METHOD` (`MPESA`, `CARD` or `FAKE`), default `FAKE` until M-Pesa is
+  connected. With FAKE the phone's last digit decides: 0 pays, 1 cancels, 2 is a wrong PIN, 3 never
+  answers, 4 is declined. Try them all from the checkout page.
+- **The private order link** (the token that proves an order is yours) never goes in a web address
+  (ADR 0010). It's kept in `localStorage` under `orders:<shop slug>`, sent in the `X-Order-Token` header
+  to read the order, and in the request body for a stream ticket and for "Try again". Another device
+  can't open the order.
+- **Live status:** a one-time ticket, then `EventSource`. If the connection drops, the page closes it,
+  waits (1 s, 2 s, 5 s, 10 s, then 30 s), gets a new ticket and reconnects. A deployed storefront on its
+  own domain needs the backend's CORS settings to allow the `X-Order-Token` header.
+- **What it shows** comes from the order status and the payment status, never from message text. It
+  says "failed" only when the server says the payment FAILED; UNKNOWN is "checking".
 
 A deployed build needs `VITE_API_BASE_URL` set to the backend's address (Vercel, a later issue).
