@@ -6,6 +6,7 @@ import { saveCart } from '../cart/cart'
 import { findOrderToken } from '../orders/order-links'
 import { routes } from '../routes'
 import { fakeBackend } from '../test-backend'
+import { FakeEventSource } from '../test-event-source'
 
 const mamaMboga = { name: 'Mama Mboga', slug: 'mamamboga', currency: 'KES' }
 const sukumaLine = { productId: 'p1', slug: 'sukuma-bundle', name: 'Sukuma bundle', priceMinor: 5000, currency: 'KES' }
@@ -37,12 +38,22 @@ describe('checkout', () => {
       totalMinor: 10000,
       currency: 'KES',
     })
+    backend.answer('/api/store/mamamboga/orders/MM-000001', 200, {
+      orderNumber: 'MM-000001',
+      status: 'PENDING_PAYMENT',
+      totalMinor: 10000,
+      currency: 'KES',
+      lines: [],
+      paymentStatus: 'INITIATED',
+    })
     backend.install()
+    FakeEventSource.install()
     const router = openCheckout()
 
     await fillIn('Amina', '0712 345 670')
 
-    expect(await screen.findByRole('heading', { name: 'Order MM-000001' })).toBeInTheDocument()
+    // The order page opens, and finds the saved link.
+    expect(await screen.findByRole('heading', { name: 'Check your phone' })).toBeInTheDocument()
     const sent = backend.requests.find((request) => request.method === 'POST')
     expect(sent?.body).toEqual({
       customerName: 'Amina',
