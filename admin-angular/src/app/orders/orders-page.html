@@ -1,6 +1,13 @@
 <main class="page">
   <header>
-    <h1>Orders</h1>
+    <h1>
+      Orders
+      @if (feedState() === 'live') {
+        <span class="live live-on" title="New orders appear here by themselves">Live</span>
+      } @else if (feedState() === 'reconnecting') {
+        <span class="live live-off">Reconnecting…</span>
+      }
+    </h1>
     <label>
       Show
       <!-- (ngModelChange) runs after ngModel has written the new choice into statusFilter. -->
@@ -32,7 +39,7 @@
       </thead>
       <tbody>
         @for (row of rows(); track row.id) {
-          <tr>
+          <tr [class.new-order]="isHighlighted(row.id)">
             <td><a [routerLink]="['/orders', row.id]">{{ row.orderNumber }}</a></td>
             <td>{{ row.customerName }}</td>
             <!-- The class lets each status have its own colour, e.g. status-PAID. -->

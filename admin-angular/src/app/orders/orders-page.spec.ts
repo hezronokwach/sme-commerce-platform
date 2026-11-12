@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideApiConfiguration } from '../api/api-configuration';
+import { FakeEventSource } from './fake-event-source';
 import { OrdersPage, buildOrderRows, countPages } from './orders-page';
 
 describe('buildOrderRows', () => {
@@ -105,6 +106,59 @@ describe('OrdersPage', () => {
     });
     expect(next.request.params.get('page')).toBe('1');
     expect(TestBed.inject(Router).url).toBe('/orders?page=2');
+  });
+
+  describe('live', () => {
+    beforeEach(() => {
+      FakeEventSource.install();
+    });
+
+    afterEach(() => {
+      FakeEventSource.uninstall();
+    });
+
+    it('opens the shop feed, and a new order reloads the list and is highlighted', async () => {
+      await harness.navigateByUrl('/orders', OrdersPage);
+      backend.expectOne(function (r) {
+        return r.url === '/api/admin/orders';
+      }).flush({ items: [], page: 0, size: 20, totalItems: 0 });
+      backend.expectOne(function (r) {
+        return r.url === '/api/admin/order-feed/ticket' && r.method === 'POST';
+      }).flush({ ticket: 't', streamUrl: '/api/admin/order-feed?ticket=t', expiresInSeconds: 60 });
+      await letPromisesRun();
+
+      expect(FakeEventSource.latest().url).toBe('/api/admin/order-feed?ticket=t');
+      FakeEventSource.latest().send({ type: 'connected', orderId: null, orderNumber: null, status: null });
+      harness.detectChanges();
+      expect(harness.routeNativeElement!.textContent).toContain('Live');
+
+      FakeEventSource.latest().send({ type: 'order-placed', orderId: 'o9', orderNumber: 'ORD-0009', status: 'PENDING_PAYMENT' });
+
+      // The list is loaded again, by itself, and shows the new order highlighted.
+      backend.expectOne(function (r) {
+        return r.url === '/api/admin/orders';
+      }).flush({ items: [{ id: 'o9', orderNumber: 'ORD-0009', customerName: 'Amina', status: 'PENDING_PAYMENT' }],
+        page: 0, size: 20, totalItems: 1 });
+      await letPromisesRun();
+      harness.detectChanges();
+
+      const row = harness.routeNativeElement!.querySelector('tbody tr')!;
+      expect(row.textContent).toContain('ORD-0009');
+      expect(row.classList.contains('new-order')).toBe(true);
+    });
+
+    it('stops the feed when the page closes', async () => {
+      await harness.navigateByUrl('/orders', OrdersPage);
+      backend.expectOne(function (r) {
+        return r.url === '/api/admin/order-feed/ticket';
+      }).flush({ ticket: 't', streamUrl: '/api/admin/order-feed?ticket=t', expiresInSeconds: 60 });
+      await letPromisesRun();
+      const stream = FakeEventSource.latest();
+
+      TestBed.resetTestingModule(); // closes the page, as leaving it would
+
+      expect(stream.closed).toBe(true);
+    });
   });
 
   function letPromisesRun(): Promise<void> {
