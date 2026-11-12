@@ -15,3 +15,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0009](0009-events-delivered-at-least-once.md) | Events between modules are delivered at least once | Accepted |
 | [0010](0010-live-order-status-with-sse-and-stream-tickets.md) | Live order status over SSE, opened with one-time stream tickets | Accepted |
 | [0011](0011-catalog-may-ask-tenant-which-shop.md) | Catalog may ask tenant which shop a web name belongs to | Accepted |
+| [0012](0012-admin-order-feed-reuses-sse.md) | The admin's live order feed reuses SSE, not STOMP | Accepted |

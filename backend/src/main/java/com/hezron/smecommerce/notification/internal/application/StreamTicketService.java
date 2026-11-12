@@ -59,23 +59,50 @@ public class StreamTicketService {
     }
 
     /**
-     * Uses the ticket up and says which order it is for.
+     * A ticket for the shop's live order feed (the admin's orders list). The shop is the caller's own,
+     * from their access token: the controller passes it in, the browser never chooses it.
+     */
+    @Transactional
+    public IssuedTicket issueForShopFeed(TenantId tenantId) {
+        String ticket = StreamTicketCodes.newTicket();
+        Instant expiresAt = Instant.now().plus(TICKET_LIFETIME);
+        tickets.save(StreamTicketEntity.newShopTicket(StreamTicketCodes.hash(ticket), tenantId.value(), expiresAt));
+        return new IssuedTicket(ticket, TICKET_LIFETIME.toSeconds());
+    }
+
+    /**
+     * Uses up an ORDER ticket and says which order it is for.
      *
-     * @throws InvalidStreamTicketException if it is unknown, already used or expired
+     * @throws InvalidStreamTicketException if it is unknown, already used, expired, or a shop-feed ticket
      */
     @Transactional
     public WatchedOrder redeem(String ticket) {
+        StreamTicketEntity row = useUp(ticket, StreamTicketEntity.SCOPE_ORDER);
+        return new WatchedOrder(TenantId.of(row.getTenantId()), row.getOrderId());
+    }
+
+    /**
+     * Uses up a SHOP ticket and says which shop's feed it opens.
+     *
+     * @throws InvalidStreamTicketException if it is unknown, already used, expired, or an order ticket
+     */
+    @Transactional
+    public TenantId redeemShopFeed(String ticket) {
+        StreamTicketEntity row = useUp(ticket, StreamTicketEntity.SCOPE_SHOP);
+        return TenantId.of(row.getTenantId());
+    }
+
+    private StreamTicketEntity useUp(String ticket, String scope) {
         if (ticket == null || ticket.isBlank()) {
             throw new InvalidStreamTicketException();
         }
         String hash = StreamTicketCodes.hash(ticket);
 
-        int changed = tickets.useUp(hash, Instant.now());
+        int changed = tickets.useUp(hash, scope, Instant.now());
         if (changed != 1) {
             throw new InvalidStreamTicketException();
         }
-        StreamTicketEntity row = tickets.findById(hash).get();
-        return new WatchedOrder(TenantId.of(row.getTenantId()), row.getOrderId());
+        return tickets.findById(hash).get();
     }
 
     /** Every day at 04:00: forget tickets that expired more than a day ago. */

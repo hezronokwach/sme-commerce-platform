@@ -30,7 +30,12 @@ public class StreamTicketEntity implements Persistable<String> {
     @Column(name = "tenant_id", nullable = false, updatable = false)
     private UUID tenantId;
 
-    @Column(name = "order_id", nullable = false, updatable = false)
+    /** ORDER (one order's status) or SHOP (every order of the shop, for the admin's live list). */
+    @Column(name = "scope", nullable = false, updatable = false)
+    private String scope;
+
+    /** The order an ORDER ticket watches; null for a SHOP ticket. */
+    @Column(name = "order_id", updatable = false)
     private UUID orderId;
 
     @Column(name = "expires_at", nullable = false, updatable = false)
@@ -46,11 +51,26 @@ public class StreamTicketEntity implements Persistable<String> {
     @Getter(AccessLevel.NONE)
     private boolean isNew = true;
 
+    public static final String SCOPE_ORDER = "ORDER";
+    public static final String SCOPE_SHOP = "SHOP";
+
+    /** A ticket for one order's status stream. */
     public static StreamTicketEntity newTicket(String ticketHash, UUID tenantId, UUID orderId, Instant expiresAt) {
+        StreamTicketEntity ticket = newTicketFor(ticketHash, tenantId, SCOPE_ORDER, expiresAt);
+        ticket.orderId = orderId;
+        return ticket;
+    }
+
+    /** A ticket for the shop's live order feed: no order. */
+    public static StreamTicketEntity newShopTicket(String ticketHash, UUID tenantId, Instant expiresAt) {
+        return newTicketFor(ticketHash, tenantId, SCOPE_SHOP, expiresAt);
+    }
+
+    private static StreamTicketEntity newTicketFor(String ticketHash, UUID tenantId, String scope, Instant expiresAt) {
         StreamTicketEntity ticket = new StreamTicketEntity();
         ticket.ticketHash = ticketHash;
         ticket.tenantId = tenantId;
-        ticket.orderId = orderId;
+        ticket.scope = scope;
         ticket.expiresAt = expiresAt;
         ticket.createdAt = Instant.now();
         return ticket;

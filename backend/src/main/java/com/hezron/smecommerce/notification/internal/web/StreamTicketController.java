@@ -46,4 +46,15 @@ class StreamTicketController {
         return StreamTicketResponse.fromResult(issued);
     }
 
+    /**
+     * {@code POST /api/admin/order-feed/ticket}: owners and staff, for the admin's live orders list. The
+     * shop is the caller's own, from the access token; the request names no shop at all.
+     */
+    @PostMapping("/api/admin/order-feed/ticket")
+    StreamTicketResponse forShopFeed(@AuthenticationPrincipal Jwt jwt) {
+        TenantId tenantId = TenantId.of(UUID.fromString(jwt.getClaimAsString(AccessTokenClaims.TENANT_ID)));
+        IssuedTicket issued = tickets.issueForShopFeed(tenantId);
+        return StreamTicketResponse.forShopFeed(issued);
+    }
+
 }
