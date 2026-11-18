@@ -5,6 +5,7 @@ import { StaffResponse } from '../api/models/staff-response';
 import { formatDateTime } from '../orders/order-labels';
 import { messageFrom } from '../shared/error-message';
 import { textOrEmpty } from '../shared/text-or-empty';
+import { PaymentMethodsSection } from './payment-methods-section';
 
 /** One row of the staff table. */
 interface StaffRow {
@@ -20,11 +21,12 @@ interface StaffRow {
  * Settings at /settings, owners only: ownerGuard keeps staff off this page, and the backend's
  * @PreAuthorize("hasRole('OWNER')") on /api/admin/staff refuses them even if they call it directly.
  *
- * For now it lists the people who can log in to this shop. Inviting and disabling staff need
+ * It holds the shop's payment methods (PaymentMethodsSection) and lists the people who can log in. Inviting and disabling staff need
  * backend endpoints that don't exist yet; they come with their own issue.
  */
 @Component({
   selector: 'app-settings-page',
+  imports: [PaymentMethodsSection],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.css',
 })

@@ -21,3 +21,16 @@ td {
 .error {
   color: #b91c1c;
 }
+
+.payment-methods {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.payment-methods li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
