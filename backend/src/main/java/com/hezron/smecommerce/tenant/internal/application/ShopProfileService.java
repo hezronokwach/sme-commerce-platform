@@ -4,6 +4,7 @@ import com.hezron.smecommerce.tenant.ShopNotFoundException;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantBrandingRepository;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantEntity;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +14,13 @@ public class ShopProfileService {
 
     private final TenantRepository tenants;
     private final TenantBrandingRepository brandings;
+    private final PaymentMethodService paymentMethods;
 
-    ShopProfileService(TenantRepository tenants, TenantBrandingRepository brandings) {
+    ShopProfileService(TenantRepository tenants, TenantBrandingRepository brandings,
+            PaymentMethodService paymentMethods) {
         this.tenants = tenants;
         this.brandings = brandings;
+        this.paymentMethods = paymentMethods;
     }
 
     /** @throws ShopNotFoundException if no shop has this slug, or the shop is suspended */
@@ -26,8 +30,9 @@ public class ShopProfileService {
                 .filter(TenantEntity::isActive)
                 .orElseThrow(() -> new ShopNotFoundException(slug));
         // Branding's primary key is the shop's id, so findById is already "this shop's row".
+        List<String> methods = paymentMethods.enabledProviders(tenant.getId());
         return brandings.findById(tenant.getId())
-                .map(branding -> ShopProfileResult.fromEntities(tenant, branding))
+                .map(branding -> ShopProfileResult.fromEntities(tenant, branding, methods))
                 .orElseThrow(() -> new IllegalStateException("Shop " + tenant.getId() + " has no branding row"));
     }
 
