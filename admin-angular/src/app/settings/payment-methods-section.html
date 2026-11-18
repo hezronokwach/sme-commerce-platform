@@ -1,0 +1,29 @@
+<h2>Payment methods</h2>
+<p class="hint">How customers can pay at checkout. Keep at least one on.</p>
+
+@if (loading()) {
+  <p>Loading…</p>
+} @else {
+  @if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  }
+  <ul class="payment-methods">
+    @for (row of rows(); track row.provider) {
+      <li>
+        <label>
+          <input
+            #box
+            type="checkbox"
+            [checked]="row.enabled"
+            [disabled]="!row.available || saving()"
+            (change)="toggle(row, box)"
+          />
+          {{ row.name }}
+        </label>
+        @if (!row.available) {
+          <span class="hint">Not available yet</span>
+        }
+      </li>
+    }
+  </ul>
+}

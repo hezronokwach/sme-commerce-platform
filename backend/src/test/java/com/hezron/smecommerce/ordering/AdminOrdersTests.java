@@ -102,8 +102,8 @@ class AdminOrdersTests {
 
         assertThat(result).hasStatus(HttpStatus.OK);
         assertThat(result).bodyJson().extractingPath("$.customerName").isEqualTo("Amina");
-        assertThat(result).bodyJson().extractingPath("$.customerPhone").isEqualTo("254712345678");
-        assertThat(result).bodyJson().extractingPath("$.paymentMethod").isEqualTo("MPESA");
+        assertThat(result).bodyJson().extractingPath("$.customerPhone").isEqualTo("254712345673");
+        assertThat(result).bodyJson().extractingPath("$.paymentMethod").isEqualTo("FAKE");
         assertThat(result).bodyJson().extractingPath("$.lines[0].productName").isEqualTo("Sukuma bundle");
         assertThat(result).bodyJson().extractingPath("$.lines[0].lineTotalMinor").isEqualTo(5000);
 
@@ -138,7 +138,7 @@ class AdminOrdersTests {
         MvcTestResult result = mvc.post().uri("/api/store/" + shop.slug() + "/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"customerName": "%s", "customerPhone": "0712345678", "paymentMethod": "MPESA",
+                        {"customerName": "%s", "customerPhone": "0712345673", "paymentMethod": "FAKE",
                          "lines": [{"productId": "%s", "quantity": %d}]}
                         """.formatted(customerName, productId, quantity))
                 .exchange();

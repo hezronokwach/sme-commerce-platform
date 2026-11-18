@@ -23,7 +23,7 @@ function backendWithShop() {
 
 async function fillIn(name: string, phone: string) {
   await userEvent.type(await screen.findByLabelText('Your name'), name)
-  await userEvent.type(screen.getByLabelText('M-Pesa phone number'), phone)
+  await userEvent.type(screen.getByLabelText('Phone number'), phone)
   await userEvent.click(screen.getByRole('button', { name: 'Pay with M-Pesa' }))
 }
 

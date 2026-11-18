@@ -5,6 +5,7 @@ import type { components } from '../api/schema'
 import { readProblem } from '../api/problem'
 import { formatMoney } from '../money'
 import { useShop } from '../shop/shop-context'
+import { CardForm } from './CardForm'
 import { watchOrder } from './live-status'
 import type { StatusMessage } from './live-status'
 import { findOrderToken } from './order-links'
@@ -61,6 +62,9 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
   const [reconnecting, setReconnecting] = useState(false)
   const [retryError, setRetryError] = useState('')
   const [retrying, setRetrying] = useState(false)
+  // Counting up loads the order again (quietly, keeping the page on screen). Used when a new payment
+  // attempt reaches the provider: for a card, that is when the card form's details exist.
+  const [reloads, setReloads] = useState(0)
 
   // 1. The order itself: lines, total, deadline, and how its payment stands right now.
   useEffect(() => {
@@ -92,7 +96,7 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
     return () => {
       stillWanted = false
     }
-  }, [slug, orderNumber, token])
+  }, [slug, orderNumber, token, reloads])
 
   // 2. Once loaded, and while the payment isn't over, watch it live.
   const loadedOrder = load.kind === 'ready'
@@ -106,6 +110,10 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
     }
     function showStatus(message: StatusMessage) {
       setNews({ status: message.status, paymentStatus: message.paymentStatus, message: message.message })
+      if (message.paymentStatus === 'PENDING') {
+        // A payment attempt just reached the provider. For a card, the form can be shown now.
+        setReloads((count) => count + 1)
+      }
     }
     const stop = watchOrder({
       shopSlug: slug,
@@ -147,6 +155,15 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
   }
   const kind = viewFor(orderStatus, paymentStatus)
 
+  // A card payment is finished in this page, with Stripe's form, instead of on the phone. The form
+  // appears once the attempt has reached Stripe (PENDING) and the server has said what it needs.
+  const payingByCard = order.paymentMethod === 'CARD'
+  let cardForm = <p aria-busy="true">Getting the card form ready...</p>
+  const action = order.paymentNextAction
+  if (paymentStatus === 'PENDING' && action && action.kind === 'CARD' && action.clientSecret && action.publishableKey) {
+    cardForm = <CardForm key={action.clientSecret} clientSecret={action.clientSecret} publishableKey={action.publishableKey} />
+  }
+
   async function tryAgain() {
     if (retrying) {
       return
@@ -184,9 +201,10 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
       <p className="order-number">Order {order.orderNumber}</p>
 
       <section className="order-status" aria-live="polite">
-        <h1>{headingFor(kind)}</h1>
-        <p>{detailFor(kind, order, news)}</p>
+        <h1>{headingFor(kind, payingByCard)}</h1>
+        <p>{detailFor(kind, order, news, payingByCard)}</p>
         {kind === 'waiting' && order.expiresAt && <TimeLeft expiresAt={order.expiresAt} />}
+        {kind === 'waiting' && payingByCard && cardForm}
         {kind === 'failed' && (
           <button type="button" className="primary-button" onClick={tryAgain} disabled={retrying}>
             Try again
@@ -223,7 +241,11 @@ function LiveOrder({ slug, orderNumber, token }: { slug: string; orderNumber: st
 
 // The sentence under the heading. The server's own words when the stream has spoken; otherwise words
 // built from the loaded order.
-function detailFor(kind: OrderViewKind, order: CustomerOrder, news: PaymentNews | null): string {
+function detailFor(kind: OrderViewKind, order: CustomerOrder, news: PaymentNews | null, byCard: boolean): string {
+  if (kind === 'waiting' && byCard) {
+    // The stream's "check your phone" is about M-Pesa; a card is paid in the form below.
+    return 'Enter your card details below. They go straight to Stripe, our card payment provider.'
+  }
   if (news && news.message) {
     return news.message
   }

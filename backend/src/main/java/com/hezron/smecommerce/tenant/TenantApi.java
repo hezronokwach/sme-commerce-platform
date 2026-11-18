@@ -25,4 +25,10 @@ public interface TenantApi {
      */
     TenantId findActiveTenantIdBySlug(String slug);
 
+    /**
+     * Whether this shop offers this way of paying (FAKE, CARD or MPESA), as its owner set it. Payments
+     * asks before starting a payment, so a method the shop turned off can never be used.
+     */
+    boolean isPaymentMethodEnabled(TenantId tenantId, String provider);
+
 }

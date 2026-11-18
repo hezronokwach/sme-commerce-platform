@@ -6,6 +6,13 @@ package com.hezron.smecommerce.payments.internal.domain;
  */
 public final class PaymentResultCodes {
 
+    /**
+     * Our code for any failed card payment (declined, wrong CVC, expired, not enough money). Stripe's own
+     * message is the reason. Always retryable: the customer can try again, or use another card.
+     */
+    // Short: result_code is varchar(10).
+    public static final String CARD_FAILED = "CARD_FAIL";
+
     private PaymentResultCodes() {
     }
 
@@ -26,6 +33,9 @@ public final class PaymentResultCodes {
         if (providerDescription != null && !providerDescription.isBlank()) {
             return providerDescription;
         }
+        if (CARD_FAILED.equals(resultCode)) {
+            return "Your card was declined.";
+        }
         return "The payment was declined.";
     }
 
@@ -44,6 +54,9 @@ public final class PaymentResultCodes {
             return true;
         }
         if ("1037".equals(resultCode)) {
+            return true;
+        }
+        if (CARD_FAILED.equals(resultCode)) {
             return true;
         }
         return false;

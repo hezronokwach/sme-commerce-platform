@@ -7,6 +7,7 @@ import com.hezron.smecommerce.ordering.internal.persistence.OrderLineEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderLineRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderRepository;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryRepository;
+import com.hezron.smecommerce.payments.PaymentNextAction;
 import com.hezron.smecommerce.payments.PaymentProviderName;
 import com.hezron.smecommerce.payments.PaymentStatusView;
 import com.hezron.smecommerce.payments.PaymentsApi;
@@ -47,7 +48,8 @@ public class CustomerOrderService {
      * @throws com.hezron.smecommerce.tenant.ShopNotFoundException if no open shop has this web name
      * @throws CustomerOrderNotFoundException                       if the order or its token don't match
      */
-    @Transactional(readOnly = true)
+    // No @Transactional here: each read below has its own short transaction, and the last step may ask
+    // the payment provider over HTTP (card), which must never hold a database transaction open.
     public CustomerOrderResult getOrder(String shopSlug, String orderNumber, String orderToken) {
         OrderEntity order = findOwnedOrder(shopSlug, orderNumber, orderToken);
 
@@ -69,9 +71,19 @@ public class CustomerOrderService {
         // toString() hides the middle digits: enough for the customer to recognise their own number.
         String phoneHint = PhoneNumber.parse(order.getCustomerPhone()).toString();
 
+        // Whatever the provider needs the browser to do (card: show the card form). Passed on as it is.
+        PaymentNextAction nextAction = null;
+        if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
+            Optional<PaymentNextAction> found = paymentsApi.findNextAction(TenantId.of(order.getTenantId()),
+                    order.getId());
+            if (found.isPresent()) {
+                nextAction = found.get();
+            }
+        }
+
         return new CustomerOrderResult(order.getOrderNumber(), order.getStatus(), order.getPaymentMethod(),
                 order.getTotalMinor(), order.getCurrency(), order.getExpiresAt(), order.getCreatedAt(), phoneHint,
-                lines, paymentStatus, paymentFailureReason);
+                lines, paymentStatus, paymentFailureReason, nextAction);
     }
 
     /**

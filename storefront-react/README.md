@@ -51,9 +51,12 @@ prices are only for showing: at checkout the server prices the order again.
 
 ## Checkout and the live order page
 
-- **Payment method:** `VITE_PAYMENT_METHOD` (`MPESA`, `CARD` or `FAKE`), default `FAKE` until M-Pesa is
-  connected. With FAKE the phone's last digit decides: 0 pays, 1 cancels, 2 is a wrong PIN, 3 never
-  answers, 4 is declined. Try them all from the checkout page.
+- **Payment methods** come from the shop's profile: its owner turns them on or off in the admin's
+  Settings, and checkout shows one button each (ADR 0013). FAKE stands in for M-Pesa: the phone's last
+  digit decides (0 pays, 1 cancels, 2 is a wrong PIN, 3 never answers, 4 is declined).
+- **Card** payments show Stripe's own card form (`@stripe/react-stripe-js`) on the order page, using the
+  client secret and publishable key the order view hands over. Card numbers go to Stripe only. Test
+  cards: `4242 4242 4242 4242` pays, `4000 0000 0000 0002` is declined (any future date, any CVC).
 - **The private order link** (the token that proves an order is yours) never goes in a web address
   (ADR 0010). It's kept in `localStorage` under `orders:<shop slug>`, sent in the `X-Order-Token` header
   to read the order, and in the request body for a stream ticket and for "Try again". Another device

@@ -6,6 +6,7 @@ export interface ShopProfileResponse {
   currency?: string;
   logoUrl?: string;
   name?: string;
+  paymentMethods?: Array<string>;
   primaryColor?: string;
   slug?: string;
   tagline?: string;

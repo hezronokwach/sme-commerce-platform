@@ -10,7 +10,8 @@ import { useCart } from '../cart/cart-context'
 import { formatMoney } from '../money'
 import { saveOrderLink } from '../orders/order-links'
 import { useShop } from '../shop/shop-context'
-import { configuredPaymentMethod } from './payment-method'
+import { offeredMethods, payButtonText } from './payment-method'
+import type { PaymentMethod } from './payment-method'
 import { normalisePhone } from './phone'
 
 // /s/:slug/checkout (workflow W6 steps 1 to 5): name and phone, then the order is placed and the
@@ -23,7 +24,8 @@ export function CheckoutPage() {
   const { slug, shop } = useShop()
   const { lines, dispatch } = useCart()
   const navigate = useNavigate()
-  const paymentMethod = configuredPaymentMethod()
+  // The ways of paying this shop offers, as its owner set them: one button each.
+  const methods = offeredMethods(shop.paymentMethods)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -42,8 +44,13 @@ export function CheckoutPage() {
     )
   }
 
-  async function placeOrder(event: FormEvent) {
+  // Pressing Enter in a field pays with the shop's first method.
+  function submitForm(event: FormEvent) {
     event.preventDefault()
+    placeOrder(methods[0])
+  }
+
+  async function placeOrder(paymentMethod: PaymentMethod) {
     if (sending) {
       return // a second tap while the first is on its way
     }
@@ -102,10 +109,6 @@ export function CheckoutPage() {
     setSending(false)
   }
 
-  let buttonText = 'Pay with M-Pesa'
-  if (sending) {
-    buttonText = 'Placing your order...'
-  }
   let currency = shop.currency ?? 'KES'
   if (lines[0].currency) {
     currency = lines[0].currency
@@ -131,7 +134,7 @@ export function CheckoutPage() {
         </p>
       </section>
 
-      <form className="checkout-form" onSubmit={placeOrder} noValidate>
+      <form className="checkout-form" onSubmit={submitForm} noValidate>
         <label>
           Your name
           <input
@@ -146,7 +149,7 @@ export function CheckoutPage() {
         {nameError && <p className="field-error">{nameError}</p>}
 
         <label>
-          M-Pesa phone number
+          Phone number
           <input
             name="phone"
             type="tel"
@@ -167,11 +170,27 @@ export function CheckoutPage() {
           </p>
         )}
 
-        <button type="submit" className="primary-button" disabled={sending}>
-          {buttonText}
-        </button>
-        <p className="cart-note">You will get a prompt on your phone to enter your M-Pesa PIN.</p>
-        {paymentMethod === 'FAKE' && (
+        <div className="pay-buttons">
+          {methods.map((method) => (
+            <button
+              key={method}
+              type="button"
+              className="primary-button"
+              disabled={sending}
+              onClick={() => placeOrder(method)}
+            >
+              {payButtonText(method)}
+            </button>
+          ))}
+        </div>
+        {sending && <p aria-busy="true">Placing your order...</p>}
+        {(methods.includes('FAKE') || methods.includes('MPESA')) && (
+          <p className="cart-note">With M-Pesa you get a prompt on your phone to enter your PIN.</p>
+        )}
+        {methods.includes('CARD') && (
+          <p className="cart-note">With card, you enter your card details on the next page, in Stripe's secure form.</p>
+        )}
+        {methods.includes('FAKE') && (
           <p className="test-note">
             Test payments: no real money moves. The last digit of the phone decides: 0 pays, 1 cancels, 2 is a
             wrong PIN, 3 never answers, 4 is declined.

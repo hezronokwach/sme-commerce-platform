@@ -179,13 +179,26 @@ class OrderToPaidTests {
     }
 
     @Test
-    void anMpesaOrderWaitsWithAClearReasonUntilMpesaIsConnected() throws Exception {
-        String orderId = placeOrder(shop, sukuma, 1, "0712345670", "MPESA");
+    void aWayOfPayingTheShopDoesNotOfferIsRefusedAndNothingIsSaved() throws Exception {
+        Integer ordersBefore = jdbc.queryForObject("SELECT count(*) FROM ordering.orders", Integer.class);
 
-        waitForPaymentStatus(orderId, "FAILED");
+        // A new shop only offers FAKE (standing in for M-Pesa); CARD is off until the owner turns it on.
+        MvcTestResult result = mvc.post().uri("/api/store/" + shop.slug() + "/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"customerName": "Amina", "customerPhone": "0712345670", "paymentMethod": "CARD",
+                         "lines": [{"productId": "%s", "quantity": 1}]}
+                        """.formatted(sukuma))
+                .exchange();
 
-        assertThat(failureReason(orderId)).contains("not connected yet");
-        assertThat(orderStatus(orderId)).isEqualTo("PENDING_PAYMENT");
+        assertThat(result).hasStatus(HttpStatus.CONFLICT);
+        assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("PAYMENT_METHOD_NOT_OFFERED");
+        // Payments refused inside ordering's transaction: no order, no payment, no stock held.
+        Integer ordersAfter = jdbc.queryForObject("SELECT count(*) FROM ordering.orders", Integer.class);
+        assertThat(ordersAfter).isEqualTo(ordersBefore);
+        Integer held = jdbc.queryForObject(
+                "SELECT reserved FROM inventory.stock_items WHERE product_id = ?::uuid", Integer.class, sukuma);
+        assertThat(held).isZero();
     }
 
     @Test

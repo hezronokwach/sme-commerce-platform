@@ -395,3 +395,17 @@ a.primary-button {
   color: var(--muted);
   font-style: italic;
 }
+
+/* --- payment choices --- */
+.pay-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}

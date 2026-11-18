@@ -33,12 +33,14 @@ class TenantService implements TenantApi {
 
     private final TenantRepository tenants;
     private final TenantBrandingRepository brandings;
+    private final PaymentMethodService paymentMethods;
     private final ApplicationEventPublisher events;
 
     TenantService(TenantRepository tenants, TenantBrandingRepository brandings,
-            ApplicationEventPublisher events) {
+            PaymentMethodService paymentMethods, ApplicationEventPublisher events) {
         this.tenants = tenants;
         this.brandings = brandings;
+        this.paymentMethods = paymentMethods;
         this.events = events;
     }
 
@@ -62,6 +64,7 @@ class TenantService implements TenantApi {
             throw e;
         }
         brandings.save(TenantBrandingEntity.defaultsFor(id));
+        paymentMethods.addDefaultsFor(id);
 
         TenantId tenantId = TenantId.of(id);
         events.publishEvent(new TenantCreatedEvent(tenantId, slug, shopName));
@@ -75,6 +78,12 @@ class TenantService implements TenantApi {
                 .filter(TenantEntity::isActive)
                 .map(tenant -> TenantId.of(tenant.getId()))
                 .orElseThrow(() -> new ShopNotFoundException(slug));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isPaymentMethodEnabled(TenantId tenantId, String provider) {
+        return paymentMethods.isEnabled(tenantId.value(), provider);
     }
 
     /** Slugs are stored lowercase, so /s/Mama-Mboga and /s/mama-mboga find the same shop. */
