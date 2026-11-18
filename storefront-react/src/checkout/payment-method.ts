@@ -1,13 +1,29 @@
-// Which payment method the storefront asks for. M-Pesa isn't connected yet (a later issue), so the
-// default is FAKE: the backend's fake provider picks the outcome from the phone's last digit.
-// Once M-Pesa works, a deployed build sets VITE_PAYMENT_METHOD=MPESA; nothing else changes.
+// The ways of paying a shop offers come from the shop's profile (its owner switches them in the admin).
+// FAKE stands in for M-Pesa until M-Pesa is connected: the phone's last digit picks the outcome.
 
 export type PaymentMethod = 'MPESA' | 'CARD' | 'FAKE'
 
-export function configuredPaymentMethod(): PaymentMethod {
-  const configured = import.meta.env.VITE_PAYMENT_METHOD
-  if (configured === 'MPESA' || configured === 'CARD' || configured === 'FAKE') {
-    return configured
+// The shop's methods this page knows, in the order the shop lists them. Anything unknown is skipped.
+// A shop always offers at least one (the backend refuses turning off the last), so the fallback is
+// only for an older backend that doesn't list them yet.
+export function offeredMethods(fromProfile: string[] | undefined): PaymentMethod[] {
+  const methods: PaymentMethod[] = []
+  if (fromProfile) {
+    for (const method of fromProfile) {
+      if (method === 'MPESA' || method === 'CARD' || method === 'FAKE') {
+        methods.push(method)
+      }
+    }
   }
-  return 'FAKE'
+  if (methods.length === 0) {
+    methods.push('FAKE')
+  }
+  return methods
+}
+
+export function payButtonText(method: PaymentMethod): string {
+  if (method === 'CARD') {
+    return 'Pay with card'
+  }
+  return 'Pay with M-Pesa'
 }

@@ -42,7 +42,10 @@ export function isFinal(kind: OrderViewKind): boolean {
   return kind === 'paid' || kind === 'cancelled' || kind === 'expired'
 }
 
-export function headingFor(kind: OrderViewKind): string {
+export function headingFor(kind: OrderViewKind, byCard: boolean): string {
+  if (kind === 'waiting' && byCard) {
+    return 'Pay by card'
+  }
   if (kind === 'waiting') {
     return 'Check your phone'
   }
