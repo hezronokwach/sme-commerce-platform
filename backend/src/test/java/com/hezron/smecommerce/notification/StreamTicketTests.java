@@ -151,7 +151,73 @@ class StreamTicketTests {
         assertThat(refused.get()).isEqualTo(tabs.length - 1);
     }
 
+    // --- the shop's live order feed (admin) ---------------------------------------------------------
+
+    @Test
+    void staffGetAShopFeedTicketForTheirOwnShop() throws Exception {
+        MvcTestResult result = shopFeedTicket(shopA);
+
+        assertThat(result).hasStatus(HttpStatus.OK);
+        String ticket = JsonPath.read(result.getResponse().getContentAsString(), "$.ticket");
+        assertThat(result).bodyJson().extractingPath("$.streamUrl")
+                .isEqualTo("/api/admin/order-feed?ticket=" + ticket);
+        // The shop comes from the login, and the ticket names no order.
+        assertThat(tickets.redeemShopFeed(ticket).value().toString()).isEqualTo(shopA.tenantId());
+        String scope = jdbc.queryForObject("""
+                SELECT scope FROM notification.stream_tickets WHERE order_id IS NULL AND tenant_id = ?::uuid
+                """, String.class, shopA.tenantId());
+        assertThat(scope).isEqualTo("SHOP");
+    }
+
+    @Test
+    void aShopFeedTicketNeedsALogin() {
+        MvcTestResult result = mvc.post().uri("/api/admin/order-feed/ticket").exchange();
+
+        assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void aShopFeedTicketCannotOpenAnOrderStream() throws Exception {
+        String shopTicket = JsonPath.read(shopFeedTicket(shopA).getResponse().getContentAsString(), "$.ticket");
+
+        assertRefused(shopTicket);
+        // Refused without being used up: it still opens the feed it was made for.
+        assertThat(tickets.redeemShopFeed(shopTicket).value().toString()).isEqualTo(shopA.tenantId());
+    }
+
+    @Test
+    void anOrderTicketCannotOpenTheShopFeed() throws Exception {
+        String orderTicket = ticketFor(order);
+
+        try {
+            tickets.redeemShopFeed(orderTicket);
+            fail("An order ticket opened the shop feed");
+        } catch (InvalidStreamTicketException expected) {
+            // refused, as it should be
+        }
+        assertThat(tickets.redeem(orderTicket).orderId().toString()).isEqualTo(order.orderId());
+    }
+
+    @Test
+    void theDatabaseRefusesAShopTicketThatNamesAnOrder() {
+        try {
+            jdbc.update("""
+                    INSERT INTO notification.stream_tickets (ticket_hash, tenant_id, order_id, scope, expires_at)
+                    VALUES (repeat('a', 64), ?::uuid, ?::uuid, 'SHOP', now() + interval '1 minute')
+                    """, shopA.tenantId(), order.orderId());
+            fail("A SHOP ticket with an order was saved");
+        } catch (org.springframework.dao.DataIntegrityViolationException expected) {
+            assertThat(expected.getMessage()).contains("ck_stream_tickets_scope");
+        }
+    }
+
     // --- helpers ---------------------------------------------------------------------------------
+
+    private MvcTestResult shopFeedTicket(Shop shop) {
+        return mvc.post().uri("/api/admin/order-feed/ticket")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + shop.token())
+                .exchange();
+    }
 
     /** One "tab": waits for the start signal, then tries the ticket. */
     private class Redeem implements Runnable {

@@ -1,15 +1,21 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Api } from '../api/api';
+import { ApiConfiguration } from '../api/api-configuration';
+import { streamTicketForShopFeed } from '../api/fn/stream-ticket/stream-ticket-for-shop-feed';
 import { adminOrderList } from '../api/fn/admin-order/admin-order-list';
 import { OrderPageResponse } from '../api/models/order-page-response';
 import { formatPrice } from '../products/format-price';
 import { messageFrom } from '../shared/error-message';
 import { ORDER_STATUSES, OrderStatus, formatDateTime, statusLabel } from './order-labels';
 import { textOrEmpty } from '../shared/text-or-empty';
+import { FeedMessage, FeedState, OrderFeed } from './order-feed';
 
 const PAGE_SIZE = 20;
+
+/** How long a just-placed order stays highlighted in the list. */
+const HIGHLIGHT_MILLIS = 6000;
 
 /** One table row: what the list shows for an order. */
 interface OrderListRow {
@@ -28,6 +34,9 @@ interface OrderListRow {
  * The filter and the page are kept in the address (/orders?status=PAID&page=2). So when you open an
  * order and press the browser's Back button, you land on the same page with the same filter, and
  * you can send someone a link to "all paid orders".
+ *
+ * The list is live (ADR 0012): while the page is open it listens to the shop's order feed, and when an
+ * order is placed or changes status it quietly loads the list again and highlights the new order.
  */
 @Component({
   selector: 'app-orders-page',
@@ -39,6 +48,8 @@ export class OrdersPage implements OnInit {
   private readonly api = inject(Api);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly apiConfiguration = inject(ApiConfiguration);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly statuses = ORDER_STATUSES;
   protected readonly statusLabel = statusLabel;
@@ -54,6 +65,11 @@ export class OrdersPage implements OnInit {
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 
+  /** The live feed: connecting, live, or reconnecting after a dropped connection. */
+  protected readonly feedState = signal<FeedState>('connecting');
+  /** Ids of orders placed while the page was open, highlighted for a few seconds. */
+  protected readonly highlighted = signal<string[]>([]);
+
   /**
    * The address is the one place the filter and page live. Every change to it, whether from our
    * buttons, the Back button or a pasted link, ends up here and loads that list.
@@ -66,8 +82,64 @@ export class OrdersPage implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((query: ParamMap) => {
       this.readAddress(query);
-      this.load();
+      this.load(true);
     });
+    this.startFeed();
+  }
+
+  /** Starts listening to the shop's live order feed, and stops when the page closes. */
+  private startFeed(): void {
+    const page = this;
+    const feed = new OrderFeed({
+      getStreamUrl: async function () {
+        const ticket = await page.api.invoke(streamTicketForShopFeed, {});
+        return textOrEmpty(ticket.streamUrl);
+      },
+      rootUrl: this.apiConfiguration.rootUrl,
+      onMessage: function (message: FeedMessage) {
+        page.orderNews(message);
+      },
+      onStateChange: function (state: FeedState) {
+        page.feedState.set(state);
+      },
+    });
+    feed.start();
+    this.destroyRef.onDestroy(function () {
+      feed.stop();
+    });
+  }
+
+  /**
+   * Something happened to one of the shop's orders. The list is loaded again (quietly, with no
+   * "Loading…"), so its filter, pages and names stay exactly what the server says. A new order is
+   * highlighted for a few seconds.
+   */
+  private orderNews(message: FeedMessage): void {
+    if (message.type === 'connected') {
+      return;
+    }
+    if (message.type === 'order-placed' && message.orderId !== null) {
+      this.highlight(message.orderId);
+    }
+    this.load(false);
+  }
+
+  private highlight(orderId: string): void {
+    this.highlighted.update(function (ids) {
+      return ids.concat([orderId]);
+    });
+    const page = this;
+    setTimeout(function () {
+      page.highlighted.update(function (ids) {
+        return ids.filter(function (id) {
+          return id !== orderId;
+        });
+      });
+    }, HIGHLIGHT_MILLIS);
+  }
+
+  protected isHighlighted(orderId: string): boolean {
+    return this.highlighted().includes(orderId);
   }
 
   /** The dropdown changed: start again at the first page. */
@@ -117,8 +189,11 @@ export class OrdersPage implements OnInit {
     }
   }
 
-  private async load(): Promise<void> {
-    this.loading.set(true);
+  /** @param showLoading false for the live feed's quiet reloads: the table stays on screen meanwhile. */
+  private async load(showLoading: boolean): Promise<void> {
+    if (showLoading) {
+      this.loading.set(true);
+    }
     this.errorMessage.set(null);
     try {
       let status: OrderStatus | undefined = undefined;
