@@ -2,6 +2,7 @@ package com.hezron.smecommerce.ordering.internal.application;
 
 import com.hezron.smecommerce.ordering.internal.domain.OrderStatus;
 import com.hezron.smecommerce.ordering.internal.domain.PaymentMethod;
+import com.hezron.smecommerce.payments.PaymentNextAction;
 import java.time.Instant;
 import java.util.List;
 
@@ -11,10 +12,13 @@ import java.util.List;
  *
  * @param paymentStatus        the newest payment attempt's status, or null if none was made yet
  * @param paymentFailureReason words for the customer, only when that attempt FAILED
+ * @param paymentNextAction    what the browser must do to finish paying (card: show Stripe's form), or
+ *                             null. Comes from payments and is passed on without being read here.
  */
 public record CustomerOrderResult(String orderNumber, OrderStatus status, PaymentMethod paymentMethod,
         long totalMinor, String currency, Instant expiresAt, Instant createdAt, String phoneHint,
-        List<LineResult> lines, String paymentStatus, String paymentFailureReason) {
+        List<LineResult> lines, String paymentStatus, String paymentFailureReason,
+        PaymentNextAction paymentNextAction) {
 
     /** One product in the order, as it was bought. */
     public record LineResult(String productName, long unitPriceMinor, int quantity, long lineTotalMinor) {

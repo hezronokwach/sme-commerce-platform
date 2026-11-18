@@ -74,7 +74,7 @@ class PlaceOrderTests {
 
     @Test
     void placedOrderWaitsForPaymentWithItsStockHeld() throws Exception {
-        MvcTestResult result = placeOrder(sukuma, 2, "0712 345 678");
+        MvcTestResult result = placeOrder(sukuma, 2, "0712 345 673");
 
         // The issue's "Done when".
         assertThat(result).hasStatus(HttpStatus.CREATED);
@@ -101,7 +101,7 @@ class PlaceOrderTests {
 
     @Test
     void theLineKeepsTheNameAndPriceOfTheMomentOfPurchase() throws Exception {
-        MvcTestResult result = placeOrder(sukuma, 2, "0712345678");
+        MvcTestResult result = placeOrder(sukuma, 2, "0712345673");
         String orderId = JsonPath.read(result.getResponse().getContentAsString(), "$.orderId");
 
         String line = jdbc.queryForObject("""
@@ -116,7 +116,7 @@ class PlaceOrderTests {
         MvcTestResult result = mvc.post().uri("/api/store/" + slug + "/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"customerName": "Mallory", "customerPhone": "0712345678", "paymentMethod": "MPESA",
+                        {"customerName": "Mallory", "customerPhone": "0712345673", "paymentMethod": "FAKE",
                          "totalMinor": 1,
                          "lines": [{"productId": "%s", "quantity": 2, "unitPriceMinor": 1, "priceMinor": 1}]}
                         """.formatted(sukuma))
@@ -129,7 +129,7 @@ class PlaceOrderTests {
 
     @Test
     void notEnoughStockSavesNothingAtAll() throws Exception {
-        MvcTestResult result = placeOrder(sukuma, 11, "0712345678");
+        MvcTestResult result = placeOrder(sukuma, 11, "0712345673");
 
         assertThat(result).hasStatus(HttpStatus.CONFLICT);
         assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("INSUFFICIENT_STOCK");
@@ -140,7 +140,7 @@ class PlaceOrderTests {
         assertThat(countFor("identity.customers")).isZero();
         assertThat(reservedOf(sukuma)).isZero();
         // ...and the order number was given back: the next order is still number 1.
-        MvcTestResult next = placeOrder(sukuma, 1, "0712345678");
+        MvcTestResult next = placeOrder(sukuma, 1, "0712345673");
         assertThat(next).bodyJson().extractingPath("$.orderNumber").asString().endsWith("-000001");
     }
 
@@ -148,7 +148,7 @@ class PlaceOrderTests {
     void aDraftProductCantBeOrdered() throws Exception {
         String draft = createProductAndReturnId("Coming soon", 100, "DRAFT");
 
-        MvcTestResult result = placeOrder(draft, 1, "0712345678");
+        MvcTestResult result = placeOrder(draft, 1, "0712345673");
 
         assertThat(result).hasStatus(HttpStatus.CONFLICT);
         assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("PRODUCT_UNAVAILABLE");
@@ -159,7 +159,7 @@ class PlaceOrderTests {
     void anotherShopsProductCantBeOrderedHere() throws Exception {
         String foreignProduct = UUID.randomUUID().toString();
 
-        MvcTestResult result = placeOrder(foreignProduct, 1, "0712345678");
+        MvcTestResult result = placeOrder(foreignProduct, 1, "0712345673");
 
         assertThat(result).hasStatus(HttpStatus.CONFLICT);
         assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("PRODUCT_UNAVAILABLE");
@@ -169,7 +169,7 @@ class PlaceOrderTests {
     void anUnknownShopIsNotFound() {
         MvcTestResult result = mvc.post().uri("/api/store/no-such-shop-" + UUID.randomUUID().toString().substring(0, 6) + "/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(orderJson(sukuma, 1, "0712345678"))
+                .content(orderJson(sukuma, 1, "0712345673"))
                 .exchange();
 
         assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -189,7 +189,7 @@ class PlaceOrderTests {
         MvcTestResult result = mvc.post().uri("/api/store/" + slug + "/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"customerName": "Amina", "customerPhone": "0712345678", "paymentMethod": "MPESA",
+                        {"customerName": "Amina", "customerPhone": "0712345673", "paymentMethod": "FAKE",
                          "lines": [{"productId": "%s", "quantity": 1}, {"productId": "%s", "quantity": 1}]}
                         """.formatted(sukuma, sukuma))
                 .exchange();
@@ -203,7 +203,7 @@ class PlaceOrderTests {
         MvcTestResult result = mvc.post().uri("/api/store/" + slug + "/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"customerName": "Amina", "customerPhone": "0712345678", "paymentMethod": "MPESA", "lines": []}
+                        {"customerName": "Amina", "customerPhone": "0712345673", "paymentMethod": "FAKE", "lines": []}
                         """)
                 .exchange();
 
@@ -213,17 +213,17 @@ class PlaceOrderTests {
 
     @Test
     void twoOrdersFromOnePhoneAreOneCustomerStoredInTheStandardForm() {
-        placeOrder(sukuma, 1, "0712 345 678");
-        placeOrder(sukuma, 1, "+254712345678");
+        placeOrder(sukuma, 1, "0712 345 673");
+        placeOrder(sukuma, 1, "+254712345673");
 
         List<String> customers = jdbc.queryForList(
                 "SELECT phone FROM identity.customers WHERE tenant_id = ?::uuid", String.class, tenantId);
-        assertThat(customers).containsExactly("254712345678");
+        assertThat(customers).containsExactly("254712345673");
     }
 
     @Test
     void onlyAHashOfTheOrderLinkTokenIsStored() throws Exception {
-        MvcTestResult result = placeOrder(sukuma, 1, "0712345678");
+        MvcTestResult result = placeOrder(sukuma, 1, "0712345673");
         String json = result.getResponse().getContentAsString();
         String token = JsonPath.read(json, "$.accessToken");
         String orderId = JsonPath.read(json, "$.orderId");
@@ -244,7 +244,7 @@ class PlaceOrderTests {
 
     private static String orderJson(String productId, int quantity, String phone) {
         return """
-                {"customerName": "Amina", "customerPhone": "%s", "paymentMethod": "MPESA",
+                {"customerName": "Amina", "customerPhone": "%s", "paymentMethod": "FAKE",
                  "lines": [{"productId": "%s", "quantity": %d}]}
                 """.formatted(phone, productId, quantity);
     }
