@@ -193,6 +193,25 @@ class CardPaymentTests {
     }
 
     @Test
+    void whenStripeDoesNotAnswerTheCreationIsSentOnceMoreAndMakesNoSecondIntent() throws Exception {
+        STRIPE.dropNextCreation(); // Stripe makes the intent, but its answer never reaches us
+        PlacedOrder order = placeOrder(1);
+
+        String reference = waitForPendingReference(order.orderId());
+
+        String paymentId = latestPaymentId(order.orderId());
+        int creations = 0;
+        for (PretendStripe.SentRequest request : STRIPE.requests()) {
+            if ("POST".equals(request.method()) && paymentId.equals(request.idempotencyKey())) {
+                creations = creations + 1;
+            }
+        }
+        // Sent twice with the same key, so Stripe answered the second with the intent the first one made.
+        assertThat(creations).isEqualTo(2);
+        assertThat(reference).isEqualTo(STRIPE.intentForKey(paymentId));
+    }
+
+    @Test
     void anEventWeDoNotUseIsAnsweredButChangesNothing() throws Exception {
         PlacedOrder order = placeOrder(1);
         String intentId = waitForPendingReference(order.orderId());

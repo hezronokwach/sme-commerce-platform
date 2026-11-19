@@ -13,6 +13,12 @@ public final class PaymentResultCodes {
     // Short: result_code is varchar(10).
     public static final String CARD_FAILED = "CARD_FAIL";
 
+    /**
+     * Our code when a start got no answer at all and the provider never gave us a reference, so we can't
+     * even ask about it. After a while it's given up as failed, and the customer can simply try again.
+     */
+    public static final String NO_REPLY = "NO_REPLY";
+
     private PaymentResultCodes() {
     }
 
@@ -36,6 +42,9 @@ public final class PaymentResultCodes {
         if (CARD_FAILED.equals(resultCode)) {
             return "Your card was declined.";
         }
+        if (NO_REPLY.equals(resultCode)) {
+            return "We couldn't confirm the payment. Please try again.";
+        }
         return "The payment was declined.";
     }
 
@@ -57,6 +66,9 @@ public final class PaymentResultCodes {
             return true;
         }
         if (CARD_FAILED.equals(resultCode)) {
+            return true;
+        }
+        if (NO_REPLY.equals(resultCode)) {
             return true;
         }
         return false;

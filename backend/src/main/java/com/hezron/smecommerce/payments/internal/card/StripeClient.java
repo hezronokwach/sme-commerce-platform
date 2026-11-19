@@ -3,6 +3,8 @@ package com.hezron.smecommerce.payments.internal.card;
 import java.net.http.HttpClient;
 import java.util.Locale;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -24,6 +27,8 @@ import tools.jackson.databind.json.JsonMapper;
 @Component
 @EnableConfigurationProperties(CardProperties.class)
 public class StripeClient {
+
+    private static final Logger log = LoggerFactory.getLogger(StripeClient.class);
 
     private final CardProperties properties;
     private final JsonMapper jsonMapper;
@@ -50,6 +55,10 @@ public class StripeClient {
     /**
      * {@code POST /v1/payment_intents}. The payment's id is the Idempotency-Key: if this is sent twice
      * (a retried event), Stripe returns the same intent instead of making a second one.
+     * <p>
+     * That key is also why this one call may be repeated (ADR 0014): if Stripe doesn't answer (a timeout
+     * or a dropped connection), it is sent once more. Even if the first one arrived, Stripe answers the
+     * second with the same intent. Without such a key a start is never repeated.
      *
      * @return the intent's id, e.g. pi_3N...
      * @throws StripeRefusedException if Stripe said no (4xx), with its message
@@ -65,6 +74,15 @@ public class StripeClient {
         form.add("metadata[payment_id]", paymentId.toString());
         form.add("metadata[order_number]", orderNumber);
 
+        try {
+            return sendCreateIntent(paymentId, form);
+        } catch (ResourceAccessException noAnswer) {
+            log.info("Stripe didn't answer creating the intent for payment {}; sending it once more", paymentId);
+            return sendCreateIntent(paymentId, form);
+        }
+    }
+
+    private String sendCreateIntent(UUID paymentId, MultiValueMap<String, String> form) {
         try {
             String body = http.post().uri("/v1/payment_intents")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.secretKey())

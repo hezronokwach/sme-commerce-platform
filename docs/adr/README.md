@@ -17,3 +17,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0011](0011-catalog-may-ask-tenant-which-shop.md) | Catalog may ask tenant which shop a web name belongs to | Accepted |
 | [0012](0012-admin-order-feed-reuses-sse.md) | The admin's live order feed reuses SSE, not STOMP | Accepted |
 | [0013](0013-card-payments-through-stripe.md) | Card payments through Stripe test mode, chosen per shop | Accepted |
+| [0014](0014-reconciliation-expiry-retries-and-circuit-breaker.md) | Reconciliation, expiring unpaid orders, safe retries and a circuit breaker | Accepted |

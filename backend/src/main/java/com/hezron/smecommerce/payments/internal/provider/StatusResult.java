@@ -6,7 +6,7 @@ package com.hezron.smecommerce.payments.internal.provider;
  * @param receiptNumber only for SUCCEEDED
  * @param resultCode    the provider's own code, e.g. "0" or "1032"
  */
-public record StatusResult(Outcome outcome, String receiptNumber, String resultCode) {
+public record StatusResult(Outcome outcome, String receiptNumber, String resultCode, Long amountMinor) {
 
     public enum Outcome {
         SUCCEEDED,

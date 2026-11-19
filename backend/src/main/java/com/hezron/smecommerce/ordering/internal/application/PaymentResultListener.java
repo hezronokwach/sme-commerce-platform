@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
  * <p>
  * Events can arrive twice (Modulith retries a listener that failed), so each method looks at the
  * order's status first and stops if the work was already done. That makes running it twice harmless.
+ * The order row is locked while doing so, the same lock the expiry job takes, so a payment result and an
+ * expiry at the same moment happen one after the other.
  * <p>
  * {@code @ApplicationModuleListener}: after payments' transaction commits, on another thread, in a
  * transaction of our own (see ProductCreatedListener in inventory for the longer explanation).
@@ -41,7 +43,7 @@ class PaymentResultListener {
 
     @ApplicationModuleListener
     void on(PaymentSucceededEvent event) {
-        Optional<OrderEntity> found = orders.findByIdAndTenantId(event.orderId(), event.tenantId().value());
+        Optional<OrderEntity> found = orders.lockByIdAndTenantId(event.orderId(), event.tenantId().value());
         if (found.isEmpty()) {
             log.error("Payment {} succeeded for order {}, which doesn't exist", event.paymentId(), event.orderId());
             return;
@@ -71,7 +73,7 @@ class PaymentResultListener {
 
     @ApplicationModuleListener
     void on(PaymentFailedEvent event) {
-        Optional<OrderEntity> found = orders.findByIdAndTenantId(event.orderId(), event.tenantId().value());
+        Optional<OrderEntity> found = orders.lockByIdAndTenantId(event.orderId(), event.tenantId().value());
         if (found.isEmpty()) {
             log.error("Payment {} failed for order {}, which doesn't exist", event.paymentId(), event.orderId());
             return;

@@ -64,8 +64,16 @@ class FakePaymentProvider implements PaymentProvider {
         // The outcome goes into the reference too, so queryStatus can answer without a database.
         String reference = "FAKE-" + outcome.ordinal() + "-" + UUID.randomUUID().toString().substring(0, 13);
 
+        if (outcome == FakeOutcome.START_TIMES_OUT) {
+            // Like a real timeout: no answer at all. The caller records UNKNOWN, never FAILED.
+            throw new IllegalStateException("Fake provider: the start request timed out");
+        }
         if (outcome == FakeOutcome.NEVER_ANSWERS) {
             log.info("Fake payment {} accepted; it will never call back", reference);
+            return StartResult.accepted(reference);
+        }
+        if (outcome == FakeOutcome.CALLBACK_LOST) {
+            log.info("Fake payment {} accepted and paid; its callback will be lost", reference);
             return StartResult.accepted(reference);
         }
 
@@ -85,13 +93,14 @@ class FakePaymentProvider implements PaymentProvider {
     @Override
     public StatusResult queryStatus(String providerReference) {
         FakeOutcome outcome = outcomeFromReference(providerReference);
-        if (outcome == FakeOutcome.SUCCEEDS) {
-            return new StatusResult(StatusResult.Outcome.SUCCEEDED, "FK-QUERY", outcome.resultCode());
+        // Like M-Pesa's status query, the fake one states no amount (null): the reference is the proof.
+        if (outcome == FakeOutcome.SUCCEEDS || outcome == FakeOutcome.CALLBACK_LOST) {
+            return new StatusResult(StatusResult.Outcome.SUCCEEDED, "FK-QUERY", outcome.resultCode(), null);
         }
         if (outcome == FakeOutcome.NEVER_ANSWERS) {
-            return new StatusResult(StatusResult.Outcome.PENDING, null, null);
+            return new StatusResult(StatusResult.Outcome.PENDING, null, null, null);
         }
-        return new StatusResult(StatusResult.Outcome.FAILED, null, outcome.resultCode());
+        return new StatusResult(StatusResult.Outcome.FAILED, null, outcome.resultCode(), null);
     }
 
     @Override

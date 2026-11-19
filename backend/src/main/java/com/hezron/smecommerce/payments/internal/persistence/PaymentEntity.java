@@ -71,6 +71,10 @@ public class PaymentEntity implements Persistable<UUID> {
     @Column(name = "next_check_at")
     private Instant nextCheckAt;
 
+    /** How often reconciliation has asked the provider about this payment (for the back-off). */
+    @Column(name = "check_attempts", nullable = false)
+    private int checkAttempts;
+
     /** Optimistic locking. Never set in Java: Hibernate owns this number. */
     @SuppressWarnings("unused")
     @Version
@@ -110,12 +114,13 @@ public class PaymentEntity implements Persistable<UUID> {
     // ---------------------------------------------------------------------------------------------
     // The state machine. These methods are the ONLY way a payment's status changes.
     //
-    //   markPending   INITIATED or UNKNOWN             -> PENDING    (provider accepted)
-    //   markUnknown   INITIATED                        -> UNKNOWN    (no clear answer from the provider)
-    //   succeed       PENDING or UNKNOWN               -> SUCCEEDED  (money arrived)
-    //   fail          INITIATED, PENDING or UNKNOWN    -> FAILED     (provider said no)
+    //   markPending   INITIATED or UNKNOWN                -> PENDING    (provider accepted)
+    //   markUnknown   INITIATED                           -> UNKNOWN    (no clear answer from the provider)
+    //   markTimedOut  PENDING or UNKNOWN                  -> TIMED_OUT  (no answer for too long; still checked)
+    //   succeed       PENDING, UNKNOWN or TIMED_OUT       -> SUCCEEDED  (money arrived)
+    //   fail          INITIATED, PENDING, UNKNOWN, TIMED_OUT -> FAILED  (provider said no)
     //
-    // SUCCEEDED and FAILED are final.
+    // SUCCEEDED and FAILED are final. TIMED_OUT isn't: the truth can still come, late.
     // ---------------------------------------------------------------------------------------------
 
     /** The provider accepted the request and gave us its reference; a callback will follow. */
@@ -137,8 +142,30 @@ public class PaymentEntity implements Persistable<UUID> {
         this.nextCheckAt = nextCheckAt;
     }
 
-    public void succeed(String receiptNumber, String resultCode) {
+    /**
+     * Still no answer long after the start. Customers see "checking", never "failed": the money may
+     * still arrive. Reconciliation keeps asking, less often.
+     */
+    public void markTimedOut(Instant nextCheckAt) {
         if (status != PaymentStatus.PENDING && status != PaymentStatus.UNKNOWN) {
+            throw new IllegalPaymentTransitionException(status, PaymentStatus.TIMED_OUT);
+        }
+        this.status = PaymentStatus.TIMED_OUT;
+        this.checkAttempts = this.checkAttempts + 1;
+        this.nextCheckAt = nextCheckAt;
+        this.updatedAt = Instant.now();
+    }
+
+    /** Asked the provider and it doesn't know yet: count it and ask again later (null: stop asking). */
+    public void scheduleNextCheck(Instant nextCheckAt) {
+        this.checkAttempts = this.checkAttempts + 1;
+        this.nextCheckAt = nextCheckAt;
+        this.updatedAt = Instant.now();
+    }
+
+    public void succeed(String receiptNumber, String resultCode) {
+        if (status != PaymentStatus.PENDING && status != PaymentStatus.UNKNOWN
+                && status != PaymentStatus.TIMED_OUT) {
             throw new IllegalPaymentTransitionException(status, PaymentStatus.SUCCEEDED);
         }
         this.status = PaymentStatus.SUCCEEDED;
@@ -149,7 +176,7 @@ public class PaymentEntity implements Persistable<UUID> {
     }
 
     public void fail(String failureReason, String resultCode) {
-        if (status.isFinal() || status == PaymentStatus.TIMED_OUT) {
+        if (status.isFinal()) {
             throw new IllegalPaymentTransitionException(status, PaymentStatus.FAILED);
         }
         this.status = PaymentStatus.FAILED;

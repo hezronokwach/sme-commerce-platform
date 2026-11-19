@@ -5,6 +5,7 @@ import com.hezron.smecommerce.payments.PaymentProviderName;
 import com.hezron.smecommerce.payments.PaymentSucceededEvent;
 import com.hezron.smecommerce.payments.internal.domain.CallbackOutcome;
 import com.hezron.smecommerce.payments.internal.domain.PaymentResultCodes;
+import com.hezron.smecommerce.payments.internal.domain.PaymentStatus;
 import com.hezron.smecommerce.payments.internal.persistence.CallbackLogEntity;
 import com.hezron.smecommerce.payments.internal.persistence.CallbackLogRepository;
 import com.hezron.smecommerce.payments.internal.persistence.PaymentEntity;
@@ -12,8 +13,10 @@ import com.hezron.smecommerce.payments.internal.persistence.PaymentRepository;
 import com.hezron.smecommerce.payments.internal.provider.CallbackResult;
 import com.hezron.smecommerce.payments.internal.provider.PaymentProvider;
 import com.hezron.smecommerce.payments.internal.provider.PaymentProviders;
+import com.hezron.smecommerce.payments.internal.provider.StatusResult;
 import com.hezron.smecommerce.shared.TenantId;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -79,6 +82,70 @@ public class PaymentCallbackService {
             return applySuccess(payment, result, providerName, rawBody);
         }
         return applyFailure(payment, result, providerName, rawBody);
+    }
+
+    /**
+     * An answer found by ASKING the provider (reconciliation) instead of a callback. Same lock, same
+     * "already final?" check, same success and failure code, so a status answer and a callback can never
+     * both apply. It's logged in callback_log too, marked as a status query.
+     * <p>
+     * The amount: when the provider states one (card), it must match. A status query that states none
+     * (M-Pesa's, and the fake one) is a confirmation of our own reference, so our own amount is taken.
+     */
+    @Transactional
+    public CallbackOutcome applyStatus(UUID paymentId, StatusResult status) {
+        Optional<PaymentEntity> found = payments.lockById(paymentId);
+        if (found.isEmpty()) {
+            return CallbackOutcome.UNKNOWN_REFERENCE;
+        }
+        PaymentEntity payment = found.get();
+        PaymentProviderName providerName = payment.getProvider();
+        String rawBody = statusQueryBody(status);
+
+        if (payment.getStatus().isFinal()) {
+            return record(providerName, payment.getProviderReference(), rawBody, CallbackOutcome.DUPLICATE);
+        }
+
+        if (status.outcome() == StatusResult.Outcome.SUCCEEDED) {
+            Long amount = status.amountMinor();
+            if (amount == null) {
+                amount = payment.getAmountMinor();
+            }
+            CallbackResult result = new CallbackResult(payment.getProviderReference(), "0", status.receiptNumber(),
+                    amount, "Confirmed by a status query");
+            return applySuccess(payment, result, providerName, rawBody);
+        }
+        CallbackResult result = new CallbackResult(payment.getProviderReference(), status.resultCode(), null, null,
+                null);
+        return applyFailure(payment, result, providerName, rawBody);
+    }
+
+    /**
+     * A start that got no answer and no reference, so the provider can't even be asked about it. After
+     * the waiting time it is given up as failed, retryable: the customer simply tries again.
+     */
+    @Transactional
+    public void giveUpUnanswered(UUID paymentId) {
+        Optional<PaymentEntity> found = payments.lockById(paymentId);
+        if (found.isEmpty()) {
+            return;
+        }
+        PaymentEntity payment = found.get();
+        if (payment.getStatus() != PaymentStatus.UNKNOWN || payment.getProviderReference() != null) {
+            return; // the answer came meanwhile
+        }
+        CallbackResult result = new CallbackResult(null, PaymentResultCodes.NO_REPLY, null, null, null);
+        applyFailure(payment, result, payment.getProvider(), "{\"source\": \"reconciliation\", \"gaveUp\": true}");
+    }
+
+    /** What callback_log keeps for an answer we asked for (raw_body is jsonb, so it is a small JSON). */
+    private static String statusQueryBody(StatusResult status) {
+        String receipt = "null";
+        if (status.receiptNumber() != null) {
+            receipt = "\"" + status.receiptNumber().replace("\"", "") + "\"";
+        }
+        return "{\"source\": \"status-query\", \"outcome\": \"" + status.outcome().name()
+                + "\", \"receipt\": " + receipt + "}";
     }
 
     private CallbackOutcome applySuccess(PaymentEntity payment, CallbackResult result, PaymentProviderName providerName,

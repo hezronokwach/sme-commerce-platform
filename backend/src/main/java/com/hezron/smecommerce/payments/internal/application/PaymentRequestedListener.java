@@ -31,10 +31,13 @@ class PaymentRequestedListener {
 
     private final PaymentStartService startService;
     private final PaymentProviders providers;
+    private final ProviderCalls providerCalls;
 
-    PaymentRequestedListener(PaymentStartService startService, PaymentProviders providers) {
+    PaymentRequestedListener(PaymentStartService startService, PaymentProviders providers,
+            ProviderCalls providerCalls) {
         this.startService = startService;
         this.providers = providers;
+        this.providerCalls = providerCalls;
     }
 
     @Async
@@ -56,7 +59,9 @@ class PaymentRequestedListener {
             return StartResult.rejected(job.provider() + " payments are not connected yet. Please choose another way to pay.");
         }
         try {
-            return provider.get().start(job.request());
+            // Through the circuit breaker: while the provider is down this is an immediate, honest
+            // "please try again in a minute" instead of a wait for a timeout. Never retried.
+            return providerCalls.start(provider.get(), job.request());
         } catch (RuntimeException e) {
             // We don't know whether the provider got the request: UNKNOWN, never FAILED.
             log.warn("Provider {} did not answer clearly for payment {}", job.provider(), job.request().paymentId(), e);
