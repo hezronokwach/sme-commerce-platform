@@ -30,7 +30,10 @@ final class PretendStripe {
     private final Map<String, String> intentStatus = new ConcurrentHashMap<>();
     private final Map<String, String> intentAmount = new ConcurrentHashMap<>();
     private final AtomicInteger nextId = new AtomicInteger(1);
+    /** Idempotency-Key -> the intent made for it. Like Stripe, a repeat with the same key gets the same intent. */
+    private final Map<String, String> intentByKey = new ConcurrentHashMap<>();
     private volatile String refuseWith = null;
+    private volatile boolean dropNextCreation = false;
 
     PretendStripe() throws IOException {
         server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
@@ -49,6 +52,19 @@ final class PretendStripe {
     /** The next intent creation answers 400 with this message, like Stripe refusing a request. */
     void refuseNextWith(String message) {
         refuseWith = message;
+    }
+
+    /**
+     * The next intent creation is made, but the answer never arrives: the connection breaks halfway,
+     * like a timeout after Stripe already did the work.
+     */
+    void dropNextCreation() {
+        dropNextCreation = true;
+    }
+
+    /** The intent made for this Idempotency-Key, or null. */
+    String intentForKey(String idempotencyKey) {
+        return intentByKey.get(idempotencyKey);
     }
 
     /** What GET returns for this intent from now on (e.g. "succeeded"). */
@@ -70,9 +86,24 @@ final class PretendStripe {
                 answer(exchange, 400, "{\"error\": {\"message\": \"" + refusal + "\"}}");
                 return;
             }
-            String id = "pi_test_" + nextId.getAndIncrement();
-            intentStatus.put(id, "requires_payment_method");
-            intentAmount.put(id, parseForm(body).getOrDefault("amount", "0"));
+            String key = exchange.getRequestHeaders().getFirst("Idempotency-Key");
+            String id = null;
+            if (key != null) {
+                id = intentByKey.get(key);
+            }
+            if (id == null) {
+                id = "pi_test_" + nextId.getAndIncrement();
+                intentStatus.put(id, "requires_payment_method");
+                intentAmount.put(id, parseForm(body).getOrDefault("amount", "0"));
+                if (key != null) {
+                    intentByKey.put(key, id);
+                }
+            }
+            if (dropNextCreation) {
+                dropNextCreation = false;
+                breakHalfway(exchange);
+                return;
+            }
             answer(exchange, 200, intentJson(id));
             return;
         }
@@ -96,6 +127,13 @@ final class PretendStripe {
                 {"id": "%s", "object": "payment_intent", "status": "%s", "client_secret": "%s_secret_pretend",
                  "amount_received": %s, "latest_charge": "ch_pretend_%s"}
                 """.formatted(id, intentStatus.get(id), id, received, id);
+    }
+
+    /** Promises a body, sends none, and closes: the client sees the connection break mid-answer. */
+    private static void breakHalfway(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, 100);
+        exchange.close();
     }
 
     private static void answer(HttpExchange exchange, int status, String json) throws IOException {

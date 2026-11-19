@@ -48,14 +48,16 @@ class PaymentReconciliationJob {
     private final PaymentCallbackService callbacks;
     private final ReconciliationSteps steps;
     private final ReconciliationProperties settings;
+    private final ProviderCalls providerCalls;
 
     PaymentReconciliationJob(PaymentRepository payments, PaymentProviders providers, PaymentCallbackService callbacks,
-            ReconciliationSteps steps, ReconciliationProperties settings) {
+            ReconciliationSteps steps, ReconciliationProperties settings, ProviderCalls providerCalls) {
         this.payments = payments;
         this.providers = providers;
         this.callbacks = callbacks;
         this.steps = steps;
         this.settings = settings;
+        this.providerCalls = providerCalls;
     }
 
     @Scheduled(fixedDelayString = "${app.payments.reconciliation.every:30s}")
@@ -93,8 +95,15 @@ class PaymentReconciliationJob {
             return;
         }
 
-        // No transaction here: this may be a slow HTTP call.
-        StatusResult status = provider.get().queryStatus(payment.getProviderReference());
+        // No transaction here: this may be a slow HTTP call. ProviderCalls retries it (it's a read) and
+        // skips it while the provider's circuit breaker is open.
+        StatusResult status;
+        try {
+            status = providerCalls.queryStatus(provider.get(), payment.getProviderReference());
+        } catch (ProviderUnavailableException breakerOpen) {
+            steps.askAgainLater(payment.getId(), now);
+            return;
+        }
 
         if (status.outcome() == StatusResult.Outcome.PENDING) {
             steps.stillWaiting(payment.getId(), now);
