@@ -17,10 +17,17 @@ top to bottom direction
 
 System_Boundary("SMECommerce_boundary", "SME Commerce", $tags="") {
   Container_Boundary("SMECommerce.SMECommerce_boundary", "SME Commerce", $tags="") {
+    Component(SMECommerce.SMECommerce.SharedKernel, "Shared Kernel", $techn="Module", $descr="", $tags="", $link="")
+    Component(SMECommerce.SMECommerce.Catalog, "Catalog", $techn="Module", $descr="", $tags="", $link="")
     Component(SMECommerce.SMECommerce.Assistant, "Assistant", $techn="Module", $descr="", $tags="", $link="")
   }
 
 }
+
+Rel(SMECommerce.SMECommerce.Assistant, SMECommerce.SMECommerce.Catalog, "listens to", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Assistant, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Assistant, SMECommerce.SMECommerce.Catalog, "uses", $techn="", $tags="", $link="")
+Rel(SMECommerce.SMECommerce.Catalog, SMECommerce.SMECommerce.SharedKernel, "depends on", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes
