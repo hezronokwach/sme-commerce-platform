@@ -102,8 +102,8 @@ public class CustomerOrderService {
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             throw new OrderNotPayableException(whyNotPayable(order.getStatus()));
         }
-        // The expiry job (a later issue) moves late orders to EXPIRED. Until it has run, the deadline
-        // itself still counts: the stock hold ends then, so a payment after it may buy nothing.
+        // The expiry job moves late orders to EXPIRED, but only once a minute. Until it has run, the
+        // deadline itself still counts: the stock hold ends then, so a payment after it may buy nothing.
         if (order.getExpiresAt() != null && Instant.now().isAfter(order.getExpiresAt())) {
             throw new OrderNotPayableException("The time to pay ran out. Please order again.");
         }
