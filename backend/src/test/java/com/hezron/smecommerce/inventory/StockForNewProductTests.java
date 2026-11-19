@@ -98,9 +98,11 @@ class StockForNewProductTests {
     private boolean waitUntilEventCompleted(String productId) throws InterruptedException {
         long giveUpAt = System.currentTimeMillis() + WAIT_AT_MOST_MILLIS;
         while (System.currentTimeMillis() < giveUpAt) {
+            // Inventory's own row: the assistant listens to the same event and has a row of its own.
             Integer done = jdbc.queryForObject("""
                     SELECT count(*) FROM event_publication
-                    WHERE serialized_event LIKE ? AND completion_date IS NOT NULL
+                    WHERE serialized_event LIKE ? AND listener_id LIKE '%ProductCreatedListener%'
+                      AND completion_date IS NOT NULL
                     """, Integer.class, "%" + productId + "%");
             if (done != null && done == 1) {
                 return true;

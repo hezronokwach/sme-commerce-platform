@@ -626,6 +626,85 @@
         }
       }
     },
+    "/api/admin/assistant/products/reindex" : {
+      "post" : {
+        "tags" : [ "AssistantDocument" ],
+        "operationId" : "assistantDocumentReindexProducts",
+        "responses" : {
+          "202" : {
+            "description" : "Accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReindexResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/assistant/documents" : {
+      "get" : {
+        "tags" : [ "AssistantDocument" ],
+        "operationId" : "assistantDocumentList",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DocumentResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "AssistantDocument" ],
+        "operationId" : "assistantDocumentUpload",
+        "parameters" : [ {
+          "name" : "title",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/store/{slug}" : {
       "get" : {
         "tags" : [ "ShopProfile" ],
@@ -1025,6 +1104,26 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/admin/assistant/documents/{documentId}" : {
+      "delete" : {
+        "tags" : [ "AssistantDocument" ],
+        "operationId" : "assistantDocumentDelete",
+        "parameters" : [ {
+          "name" : "documentId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }
@@ -1458,6 +1557,52 @@
           }
         },
         "required" : [ "name", "priceMinor" ]
+      },
+      "ReindexResponse" : {
+        "type" : "object",
+        "properties" : {
+          "productsQueued" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "DocumentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "sourceType" : {
+            "type" : "string"
+          },
+          "sourceId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "chunkCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
       },
       "ShopProfileResponse" : {
         "type" : "object",
