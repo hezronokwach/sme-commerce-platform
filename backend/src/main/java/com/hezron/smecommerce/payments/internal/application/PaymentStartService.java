@@ -9,7 +9,6 @@ import com.hezron.smecommerce.payments.internal.persistence.PaymentRepository;
 import com.hezron.smecommerce.payments.internal.provider.PaymentRequest;
 import com.hezron.smecommerce.payments.internal.provider.StartResult;
 import com.hezron.smecommerce.shared.TenantId;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,16 +32,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PaymentStartService {
 
-    /** When the reconciliation job (later issue) should ask the provider, if no callback came. */
-    private static final Duration FIRST_CHECK_AFTER_ACCEPTED = Duration.ofSeconds(90);
-    private static final Duration FIRST_CHECK_AFTER_UNKNOWN = Duration.ofSeconds(60);
-
     private final PaymentRepository payments;
     private final ApplicationEventPublisher events;
+    /** When reconciliation first asks the provider, if no callback came by then. */
+    private final ReconciliationProperties reconciliation;
 
-    PaymentStartService(PaymentRepository payments, ApplicationEventPublisher events) {
+    PaymentStartService(PaymentRepository payments, ApplicationEventPublisher events,
+            ReconciliationProperties reconciliation) {
         this.payments = payments;
         this.events = events;
+        this.reconciliation = reconciliation;
     }
 
     /** What the provider must be told. Empty if the payment was already started (a repeated event). */
@@ -73,7 +72,7 @@ public class PaymentStartService {
         }
 
         if (result.outcome() == StartResult.Outcome.ACCEPTED) {
-            payment.markPending(result.providerReference(), Instant.now().plus(FIRST_CHECK_AFTER_ACCEPTED));
+            payment.markPending(result.providerReference(), Instant.now().plus(reconciliation.firstCheckAfterAccepted()));
             events.publishEvent(new PaymentStartedEvent(TenantId.of(tenantId), payment.getOrderId(),
                     payment.getId(), PaymentStatus.PENDING.name()));
         } else if (result.outcome() == StartResult.Outcome.REJECTED) {
@@ -82,7 +81,7 @@ public class PaymentStartService {
             events.publishEvent(new PaymentFailedEvent(TenantId.of(tenantId), payment.getOrderId(),
                     payment.getId(), result.reason(), true));
         } else {
-            payment.markUnknown(Instant.now().plus(FIRST_CHECK_AFTER_UNKNOWN));
+            payment.markUnknown(Instant.now().plus(reconciliation.firstCheckAfterUnknown()));
             // We don't know whether the prompt reached the phone: "checking", never "failed".
             events.publishEvent(new PaymentStartedEvent(TenantId.of(tenantId), payment.getOrderId(),
                     payment.getId(), PaymentStatus.UNKNOWN.name()));

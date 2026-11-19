@@ -3,12 +3,16 @@ package com.hezron.smecommerce.payments.internal.persistence;
 import com.hezron.smecommerce.payments.PaymentProviderName;
 import com.hezron.smecommerce.payments.internal.domain.PaymentStatus;
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PaymentRepository extends JpaRepository<PaymentEntity, UUID> {
 
@@ -33,5 +37,26 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<PaymentEntity> findForUpdateByProviderAndProviderReference(PaymentProviderName provider,
             String providerReference);
+
+    /**
+     * One payment, LOCKED until the transaction ends. For reconciliation: an answer found by asking the
+     * provider is applied under the same lock as a callback, so the two can never both apply.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM PaymentEntity p WHERE p.id = :id")
+    Optional<PaymentEntity> lockById(@Param("id") UUID id);
+
+    /**
+     * Payments whose next check is due, oldest due first, for the reconciliation job. Like the callback
+     * lookup this spans every shop: it's the system's own job, not a shop's request. Each row carries
+     * its tenant_id, and everything done with it afterwards uses that.
+     */
+    @Query("""
+            SELECT p FROM PaymentEntity p
+            WHERE p.status IN :statuses AND p.nextCheckAt IS NOT NULL AND p.nextCheckAt <= :now
+            ORDER BY p.nextCheckAt
+            """)
+    List<PaymentEntity> findDueForCheck(@Param("statuses") Collection<PaymentStatus> statuses,
+            @Param("now") Instant now, Pageable page);
 
 }

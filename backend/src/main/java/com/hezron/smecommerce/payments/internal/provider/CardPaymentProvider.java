@@ -58,13 +58,13 @@ class CardPaymentProvider implements PaymentProvider {
         StripeClient.Intent intent = stripe.readIntent(providerReference);
         if ("succeeded".equals(intent.status())) {
             return new StatusResult(StatusResult.Outcome.SUCCEEDED, receiptOf(intent.latestCharge(), intent.id()),
-                    SUCCEEDED);
+                    SUCCEEDED, intent.amountReceived());
         }
         if ("canceled".equals(intent.status())) {
-            return new StatusResult(StatusResult.Outcome.FAILED, null, FAILED);
+            return new StatusResult(StatusResult.Outcome.FAILED, null, FAILED, null);
         }
         // requires_payment_method, requires_confirmation, processing...: not finished yet.
-        return new StatusResult(StatusResult.Outcome.PENDING, null, null);
+        return new StatusResult(StatusResult.Outcome.PENDING, null, null, null);
     }
 
     /**

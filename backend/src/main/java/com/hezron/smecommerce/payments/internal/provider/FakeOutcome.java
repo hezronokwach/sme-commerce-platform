@@ -20,7 +20,11 @@ public enum FakeOutcome {
     CANCELLED("1032", "Request cancelled by user"),
     WRONG_PIN("2001", "The initiator information is invalid."),
     NEVER_ANSWERS(null, null),
-    DECLINED("9999", "Declined by the fake provider");
+    DECLINED("9999", "Declined by the fake provider"),
+    /** Digit 6: accepted and paid, but the callback is lost on the way. Only a status query finds out. */
+    CALLBACK_LOST("0", "The service request is processed successfully."),
+    /** Digit 7: the start request times out, so we never learn whether it reached the provider. */
+    START_TIMES_OUT(null, null);
 
     private final String resultCode;
     private final String description;
@@ -52,6 +56,12 @@ public enum FakeOutcome {
         }
         if (lastDigit == '4') {
             return DECLINED;
+        }
+        if (lastDigit == '6') {
+            return CALLBACK_LOST;
+        }
+        if (lastDigit == '7') {
+            return START_TIMES_OUT;
         }
         return SUCCEEDS;
     }

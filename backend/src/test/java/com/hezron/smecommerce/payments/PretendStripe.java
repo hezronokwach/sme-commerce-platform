@@ -28,6 +28,7 @@ final class PretendStripe {
     private final HttpServer server;
     private final List<SentRequest> requests = new CopyOnWriteArrayList<>();
     private final Map<String, String> intentStatus = new ConcurrentHashMap<>();
+    private final Map<String, String> intentAmount = new ConcurrentHashMap<>();
     private final AtomicInteger nextId = new AtomicInteger(1);
     private volatile String refuseWith = null;
 
@@ -71,6 +72,7 @@ final class PretendStripe {
             }
             String id = "pi_test_" + nextId.getAndIncrement();
             intentStatus.put(id, "requires_payment_method");
+            intentAmount.put(id, parseForm(body).getOrDefault("amount", "0"));
             answer(exchange, 200, intentJson(id));
             return;
         }
@@ -84,11 +86,16 @@ final class PretendStripe {
         answer(exchange, 200, intentJson(id));
     }
 
+    /** Like Stripe: amount_received is the whole amount once the intent succeeded, 0 before. */
     private String intentJson(String id) {
+        String received = "0";
+        if ("succeeded".equals(intentStatus.get(id))) {
+            received = intentAmount.getOrDefault(id, "0");
+        }
         return """
                 {"id": "%s", "object": "payment_intent", "status": "%s", "client_secret": "%s_secret_pretend",
-                 "amount_received": 0}
-                """.formatted(id, intentStatus.get(id), id);
+                 "amount_received": %s, "latest_charge": "ch_pretend_%s"}
+                """.formatted(id, intentStatus.get(id), id, received, id);
     }
 
     private static void answer(HttpExchange exchange, int status, String json) throws IOException {
