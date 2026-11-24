@@ -72,9 +72,9 @@ class PaymentMethodsTests {
                 .containsExactly(true);
         assertThat(result).bodyJson().extractingPath("$[?(@.provider == 'CARD')].enabled").asArray()
                 .containsExactly(false);
-        // M-Pesa is listed, but can't be used until it is connected.
+        // Real M-Pesa is listed and can be turned on, but isn't on for a new shop.
         assertThat(result).bodyJson().extractingPath("$[?(@.provider == 'MPESA')].available").asArray()
-                .containsExactly(false);
+                .containsExactly(true);
         assertThat(profileMethods(shopA)).containsExactly("FAKE");
     }
 
@@ -99,11 +99,11 @@ class PaymentMethodsTests {
     }
 
     @Test
-    void mpesaCannotBeTurnedOnYet() {
+    void theOwnerCanTurnOnRealMpesa() {
         MvcTestResult result = set(shopA.token(), "MPESA", true);
 
-        assertThat(result).hasStatus(HttpStatus.CONFLICT);
-        assertThat(result).bodyJson().extractingPath("$.code").isEqualTo("PAYMENT_METHOD_UNAVAILABLE");
+        assertThat(result).hasStatus(HttpStatus.OK);
+        assertThat(profileMethods(shopA)).contains("MPESA");
     }
 
     @Test

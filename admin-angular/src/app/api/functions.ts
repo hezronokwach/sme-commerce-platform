@@ -23,6 +23,8 @@ export type { CategoryList$Params as CategoryList$Params } from './fn/category/c
 export { categoryList as categoryList } from './fn/category/category-list';
 export type { CategoryCreate$Params as CategoryCreate$Params } from './fn/category/category-create';
 export { categoryCreate as categoryCreate } from './fn/category/category-create';
+export type { MpesaCallbackReceive$Params as MpesaCallbackReceive$Params } from './fn/mpesa-callback/mpesa-callback-receive';
+export { mpesaCallbackReceive as mpesaCallbackReceive } from './fn/mpesa-callback/mpesa-callback-receive';
 export type { CardWebhookReceive$Params as CardWebhookReceive$Params } from './fn/card-webhook/card-webhook-receive';
 export { cardWebhookReceive as cardWebhookReceive } from './fn/card-webhook/card-webhook-receive';
 export type { StorefrontOrderPlace$Params as StorefrontOrderPlace$Params } from './fn/storefront-order/storefront-order-place';
