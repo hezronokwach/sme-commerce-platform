@@ -1,0 +1,86 @@
+<section class="shop-section">
+  <h2>Shop</h2>
+  <p class="hint">What customers see at the top of your shop.</p>
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else {
+    <form class="shop-form" (ngSubmit)="save()">
+      <label>
+        Shop name
+        <input name="name" maxlength="120" required [(ngModel)]="name" />
+      </label>
+
+      <label>
+        Web name
+        <input name="slug" [value]="slug()" readonly />
+        <span class="hint">Part of your shop's link, so it can't change: links you already shared keep working.</span>
+      </label>
+
+      <label>
+        Tagline
+        <input name="tagline" maxlength="160" placeholder="e.g. Tools for every job" [(ngModel)]="tagline" />
+        <span class="hint">One short line, shown as the heading of your shop. Leave it empty for "All products".</span>
+      </label>
+
+      <div class="logo-field">
+        <span class="field-label">Logo</span>
+        <div class="logo-row">
+          @if (logoUrl !== '') {
+            <img class="logo-preview" [src]="logoPreview()" alt="Your logo" />
+          } @else {
+            <span class="logo-preview logo-empty" aria-hidden="true"></span>
+          }
+          <label class="upload-button">
+            <input type="file" accept="image/*" (change)="logoChosen($event)" />
+            @if (uploadingLogo()) {
+              Uploading…
+            } @else if (logoUrl !== '') {
+              Change logo
+            } @else {
+              Upload logo
+            }
+          </label>
+          @if (logoUrl !== '') {
+            <button type="button" class="link" (click)="removeLogo()">Remove</button>
+          }
+        </div>
+      </div>
+
+      <div class="colours">
+        <label>
+          Button colour
+          <span class="colour-row">
+            <input type="color" name="primaryPicker" [(ngModel)]="primaryColor" aria-label="Pick the button colour" />
+            <input name="primaryColor" maxlength="7" [(ngModel)]="primaryColor" />
+          </span>
+        </label>
+        <label>
+          Accent colour (prices)
+          <span class="colour-row">
+            <input type="color" name="accentPicker" [(ngModel)]="accentColor" aria-label="Pick the accent colour" />
+            <input name="accentColor" maxlength="7" [(ngModel)]="accentColor" />
+          </span>
+        </label>
+      </div>
+      <button type="button" class="link" (click)="useDefaultColours()">Use the default colours</button>
+
+      @if (errorMessage() !== null) {
+        <p class="error" role="alert">{{ errorMessage() }}</p>
+      }
+      @if (savedMessage() !== null) {
+        <p class="saved" role="status">{{ savedMessage() }}</p>
+      }
+
+      <div>
+        <button type="submit" [disabled]="saving() || uploadingLogo()">
+          @if (saving()) {
+            Saving…
+          } @else {
+            Save shop details
+          }
+        </button>
+      </div>
+    </form>
+  }
+</section>
