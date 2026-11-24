@@ -76,6 +76,11 @@ public class TenantEntity implements Persistable<UUID> {
         return id;
     }
 
+    /** The owner renames the shop. The slug (its web address) never changes, so shared links keep working. */
+    public void rename(String newName) {
+        this.name = newName;
+    }
+
     /** Open for business. A SUSPENDED shop keeps its data but its storefront is closed. */
     public boolean isActive() {
         return "ACTIVE".equals(status);
