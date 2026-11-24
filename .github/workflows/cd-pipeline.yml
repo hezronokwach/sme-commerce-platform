@@ -56,6 +56,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./mvnw sonar:sonar --no-transfer-progress -Dsonar.branch.name=${{ github.ref_name }}
 
+      # The same image Render will run, built from the code that just passed the tests.
+      - name: Build the Docker image
+        run: docker build --tag sme-commerce-backend:${{ github.sha }} .
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v7
         with:
