@@ -15,7 +15,7 @@ type ListState =
   | { kind: 'ready'; products: StoreProduct[] }
 
 export function ProductListPage() {
-  const { slug } = useShop()
+  const { slug, shop } = useShop()
   const [searchParams, setSearchParams] = useSearchParams()
   const categoryId = searchParams.get('category') ?? ''
 
@@ -27,8 +27,20 @@ export function ProductListPage() {
     }
   }
 
+  // The shop's tagline is the page's heading; a shop without one gets a plain "All products".
+  let heading = 'All products'
+  if (shop.tagline) {
+    heading = shop.tagline
+  }
+
   return (
     <>
+      <section className="shop-intro">
+        <div>
+          <p className="eyebrow">Shop all</p>
+          <h1>{heading}</h1>
+        </div>
+      </section>
       <CategoryMenu slug={slug} chosenId={categoryId} onChoose={chooseCategory} />
       {/* A new key for each category, so each list starts at "loading" (see ShopLayout). */}
       <ProductGrid key={categoryId} slug={slug} categoryId={categoryId} />

@@ -86,10 +86,12 @@ function LoadedProduct({ slug, productSlug }: { slug: string; productSlug: strin
     <article className="product-page">
       {backToShop}
       <ProductImage product={product} />
-      <h1>{product.name}</h1>
-      <p className="product-price">{formatMoney(product.priceMinor ?? 0, product.currency ?? 'KES')}</p>
-      {product.description && <p className="product-description">{product.description}</p>}
-      <AddToCart product={product} shopSlug={slug} />
+      <div className="product-details">
+        <h1>{product.name}</h1>
+        <p className="product-price">{formatMoney(product.priceMinor ?? 0, product.currency ?? 'KES')}</p>
+        {product.description && <p className="product-description">{product.description}</p>}
+        <AddToCart product={product} shopSlug={slug} />
+      </div>
     </article>
   )
 }

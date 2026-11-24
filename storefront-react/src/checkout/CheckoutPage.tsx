@@ -36,11 +36,11 @@ export function CheckoutPage() {
 
   if (lines.length === 0) {
     return (
-      <>
+      <div className="checkout-page">
         <h1>Checkout</h1>
         <p>Your cart is empty.</p>
         <Link to={`/s/${slug}`}>Continue shopping</Link>
-      </>
+      </div>
     )
   }
 
@@ -115,7 +115,7 @@ export function CheckoutPage() {
   }
 
   return (
-    <>
+    <div className="checkout-page">
       <h1>Checkout</h1>
 
       <section className="checkout-summary" aria-label="Your order">
@@ -197,7 +197,7 @@ export function CheckoutPage() {
           </p>
         )}
       </form>
-    </>
+    </div>
   )
 }
 

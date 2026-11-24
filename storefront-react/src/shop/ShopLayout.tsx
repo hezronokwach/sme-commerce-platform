@@ -61,11 +61,15 @@ function LoadedShop({ slug }: { slug: string }) {
   }, [slug])
 
   if (state.kind === 'loading') {
-    return <main aria-busy="true">Loading the shop...</main>
+    return (
+      <main aria-busy="true" className="message-page">
+        Loading the shop...
+      </main>
+    )
   }
   if (state.kind === 'not-found') {
     return (
-      <main>
+      <main className="message-page">
         <h1>Shop not found</h1>
         <p>There is no shop at this address. Check the link you were sent.</p>
       </main>
@@ -73,10 +77,10 @@ function LoadedShop({ slug }: { slug: string }) {
   }
   if (state.kind === 'error') {
     return (
-      <main>
+      <main className="message-page">
         <h1>Something went wrong</h1>
         <p>We couldn't load this shop. Check your connection and try again.</p>
-        <button type="button" onClick={() => window.location.reload()}>
+        <button type="button" className="primary-button" onClick={() => window.location.reload()}>
           Try again
         </button>
       </main>
@@ -96,11 +100,13 @@ function LoadedShop({ slug }: { slug: string }) {
             </Link>
             <CartBadge slug={slug} />
           </div>
-          {shop.tagline && <p className="shop-tagline">{shop.tagline}</p>}
         </header>
         <main>
           <Outlet context={context} />
         </main>
+        <footer className="shop-footer">
+          Pay by M-Pesa or card. Your order's status updates on its own page as soon as the payment is in.
+        </footer>
         <AssistantPanel slug={slug} shopName={shop.name ?? slug} />
       </div>
     </CartProvider>
