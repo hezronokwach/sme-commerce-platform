@@ -30,4 +30,25 @@ class EvaluationCaseTests {
         assertThat(row.passes("I don't sell it, but Kamau charges 750.")).isFalse();
     }
 
+    @Test
+    void spacingAndTypographicPunctuationDontMatter() {
+        EvaluationCase sundays = new EvaluationCase("Do you deliver on Sundays?", "9am", "", "mamamboga");
+        EvaluationCase cement = new EvaluationCase("Do you sell cement?", "don't", "750", "mamamboga");
+        EvaluationCase payment = new EvaluationCase("Which payment methods?", "M-Pesa", "", "mamamboga");
+
+        assertThat(sundays.passes("Yes, between 9 am and 1 pm.")).isTrue();
+        assertThat(sundays.passes("Yes, between 9 am and 1 pm.")).isTrue();
+        assertThat(cement.passes("We don’t sell cement.")).isTrue();
+        assertThat(payment.passes("We accept M‑Pesa.")).isTrue();
+        assertThat(payment.passes("We accept M‑Pay​sa.")).isFalse();
+    }
+
+    @Test
+    void theCantAnswerRightNowReplyNeverPasses() {
+        EvaluationCase row = new EvaluationCase("Can I return cut vegetables?", "no/not/cannot/can't", "", "mamamboga");
+
+        assertThat(row.passes(EvaluationCase.UNAVAILABLE)).isFalse();
+        assertThat(row.passes("No, cut vegetables cannot be returned.")).isTrue();
+    }
+
 }

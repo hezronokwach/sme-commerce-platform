@@ -15,6 +15,9 @@ import java.util.Locale;
  */
 record EvaluationCase(String question, String mustContain, String mustNotContain, String shop) {
 
+    /** The same text as AssistantAnswerService.UNAVAILABLE, which is internal to the module. */
+    static final String UNAVAILABLE = "The assistant can't answer right now. Please try again in a moment.";
+
     static List<EvaluationCase> load() throws IOException {
         List<EvaluationCase> cases = new ArrayList<>();
         try (InputStream file = EvaluationCase.class.getResourceAsStream("/assistant-eval.csv");
@@ -33,16 +36,42 @@ record EvaluationCase(String question, String mustContain, String mustNotContain
     }
 
     boolean passes(String answer) {
-        String lower = answer.toLowerCase(Locale.ROOT);
-        if (!mustNotContain.isEmpty() && lower.contains(mustNotContain.toLowerCase(Locale.ROOT))) {
+        // "Can't answer right now" means the model wasn't reached: never a pass, even when it happens
+        // to contain an expected word such as "can't".
+        if (answer.equals(UNAVAILABLE)) {
+            return false;
+        }
+        String text = simplify(answer);
+        if (!mustNotContain.isEmpty() && text.contains(simplify(mustNotContain))) {
             return false;
         }
         for (String option : mustContain.split("/")) {
-            if (lower.contains(option.toLowerCase(Locale.ROOT))) {
+            if (text.contains(simplify(option))) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Lower case, with every kind of space left out and typographic apostrophes and dashes made plain.
+     * So "9 am" matches "9am", and "don’t" matches "don't": we score what the answer says, not its typing.
+     */
+    static String simplify(String text) {
+        StringBuilder simple = new StringBuilder();
+        for (char c : text.toLowerCase(Locale.ROOT).toCharArray()) {
+            if (Character.isWhitespace(c) || Character.isSpaceChar(c) || Character.getType(c) == Character.FORMAT) {
+                continue; // includes no-break and zero-width spaces
+            }
+            if (c == '‘' || c == '’') {
+                simple.append('\'');
+            } else if (c >= '‐' && c <= '―') {
+                simple.append('-');
+            } else {
+                simple.append(c);
+            }
+        }
+        return simple.toString();
     }
 
 }
