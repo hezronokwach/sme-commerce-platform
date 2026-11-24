@@ -1,5 +1,6 @@
 package com.hezron.smecommerce.catalog.internal.application;
 
+import com.hezron.smecommerce.audit.AuditApi;
 import com.hezron.smecommerce.catalog.ProductChangedEvent;
 import com.hezron.smecommerce.catalog.ProductCreatedEvent;
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
@@ -12,6 +13,7 @@ import com.hezron.smecommerce.shared.Money;
 import com.hezron.smecommerce.shared.TenantId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,11 +44,14 @@ public class ProductService {
     private final ProductRepository products;
     private final CategoryRepository categories;
     private final ApplicationEventPublisher events;
+    private final AuditApi audit;
 
-    ProductService(ProductRepository products, CategoryRepository categories, ApplicationEventPublisher events) {
+    ProductService(ProductRepository products, CategoryRepository categories, ApplicationEventPublisher events,
+            AuditApi audit) {
         this.products = products;
         this.categories = categories;
         this.events = events;
+        this.audit = audit;
     }
 
     /** All the shop's products, newest first. With a status, only products in that status. */
@@ -120,7 +125,10 @@ public class ProductService {
         checkStatusAllowed(command.status());
         checkCategoryInShop(tenantId, command.categoryId());
 
-        // TODO(audit issue): record PRODUCT_PRICE_CHANGED with the old and new price (Guide 3.1).
+        if (product.getPriceMinor() != command.priceMinor()) {
+            audit.record(TenantId.of(tenantId), "PRODUCT_PRICE_CHANGED", "PRODUCT", productId,
+                    Map.of("oldPriceMinor", product.getPriceMinor(), "newPriceMinor", command.priceMinor()));
+        }
         product.changeDetails(command.categoryId(), command.name().strip(), command.description(),
                 command.priceMinor(), command.imageUrl(), command.status());
         // Flush so the new version number is in the result. If someone saved between our check above and

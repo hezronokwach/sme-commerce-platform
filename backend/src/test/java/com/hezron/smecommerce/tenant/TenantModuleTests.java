@@ -10,14 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.modulith.test.ApplicationModuleTest;
+import org.springframework.modulith.test.ApplicationModuleTest.BootstrapMode;
 import org.springframework.modulith.test.AssertablePublishedEvents;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Boots only the tenant module and the shared kernel, against a real Postgres. If tenant secretly
- * needed another module, this context would fail to start.
+ * Boots only the tenant module and the modules it may use (shared and audit), against a real Postgres.
+ * If tenant secretly needed any other module, this context would fail to start.
  */
-@ApplicationModuleTest
+@ApplicationModuleTest(mode = BootstrapMode.DIRECT_DEPENDENCIES)
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("test")
 class TenantModuleTests {

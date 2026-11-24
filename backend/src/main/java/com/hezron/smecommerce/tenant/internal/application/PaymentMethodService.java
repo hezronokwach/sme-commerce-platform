@@ -1,9 +1,12 @@
 package com.hezron.smecommerce.tenant.internal.application;
 
+import com.hezron.smecommerce.audit.AuditApi;
+import com.hezron.smecommerce.shared.TenantId;
 import com.hezron.smecommerce.tenant.internal.persistence.PaymentMethodEntity;
 import com.hezron.smecommerce.tenant.internal.persistence.PaymentMethodRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentMethodService {
 
     private final PaymentMethodRepository methods;
+    private final AuditApi audit;
 
-    PaymentMethodService(PaymentMethodRepository methods) {
+    PaymentMethodService(PaymentMethodRepository methods, AuditApi audit) {
         this.methods = methods;
+        this.audit = audit;
     }
 
     /** Every method the platform knows, each with whether this shop has it on. For the owner's settings. */
@@ -104,6 +109,8 @@ public class PaymentMethodService {
             }
         }
         methods.flush();
+        audit.record(TenantId.of(tenantId), "PAYMENT_SETTINGS_UPDATED", "PAYMENT_METHOD", null,
+                Map.of("provider", provider, "enabled", enabled));
         return listForOwner(tenantId);
     }
 

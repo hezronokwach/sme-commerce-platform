@@ -6,6 +6,8 @@
 |_Services_
 
 * `c.h.s.i.InventoryApi` (via `c.h.s.i.internal.application.ReservationService`)
+|Bean references
+|* `c.h.s.a.AuditApi` (in Audit)
 |Events listened to
 |* `c.h.s.c.ProductCreatedEvent` (async) 
 |===
