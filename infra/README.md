@@ -14,3 +14,8 @@ Render will run it. It reads secrets from `backend/.env`.
 ```bash
 docker compose -f infra/compose.yaml up --build
 ```
+
+## Render
+
+`render.yaml` is the Render Blueprint for the backend and its database. The full steps are in
+[docs/deploy.md](../docs/deploy.md).
