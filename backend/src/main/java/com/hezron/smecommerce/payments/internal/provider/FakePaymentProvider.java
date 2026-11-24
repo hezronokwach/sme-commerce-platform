@@ -4,6 +4,7 @@ import com.hezron.smecommerce.payments.PaymentProviderName;
 import com.hezron.smecommerce.payments.internal.application.PaymentCallbackService;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -11,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -85,7 +87,8 @@ class FakePaymentProvider implements PaymentProvider {
                 request.amountMinor(), outcome.description());
         String rawBody = jsonMapper.writeValueAsString(body);
 
-        scheduler.schedule(new SendCallback(rawBody), callbackDelay.toMillis(), TimeUnit.MILLISECONDS);
+        scheduler.schedule(new SendCallback(rawBody, MDC.getCopyOfContextMap()), callbackDelay.toMillis(),
+                TimeUnit.MILLISECONDS);
         log.info("Fake payment {} accepted; outcome {} in {}", reference, outcome, callbackDelay);
         return StartResult.accepted(reference);
     }
@@ -138,19 +141,27 @@ class FakePaymentProvider implements PaymentProvider {
     private class SendCallback implements Runnable {
 
         private final String rawBody;
+        /** The log context of the order that started this, so one id traces the whole payment. */
+        private final Map<String, String> logContext;
 
-        SendCallback(String rawBody) {
+        SendCallback(String rawBody, Map<String, String> logContext) {
             this.rawBody = rawBody;
+            this.logContext = logContext;
         }
 
         @Override
         public void run() {
+            if (logContext != null) {
+                MDC.setContextMap(logContext);
+            }
             try {
                 callbacks.receive(PaymentProviderName.FAKE, rawBody);
             } catch (RuntimeException e) {
                 // A real provider would just see an error answer; the reconciliation job (later issue)
                 // finds payments whose callback never got through.
                 log.error("Fake callback could not be applied", e);
+            } finally {
+                MDC.clear();
             }
         }
     }

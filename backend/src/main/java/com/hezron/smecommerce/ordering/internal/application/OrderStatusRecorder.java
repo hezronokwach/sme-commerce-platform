@@ -5,6 +5,8 @@ import com.hezron.smecommerce.ordering.internal.persistence.OrderEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryEntity;
 import com.hezron.smecommerce.ordering.internal.persistence.OrderStatusHistoryRepository;
 import com.hezron.smecommerce.shared.TenantId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class OrderStatusRecorder {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderStatusRecorder.class);
 
     private final OrderStatusHistoryRepository history;
     private final ApplicationEventPublisher events;
@@ -34,6 +38,8 @@ class OrderStatusRecorder {
         if (change.getFromStatus() != null) {
             from = change.getFromStatus().name();
         }
+        // Every status change passes here, so this line lets one order be followed through the logs.
+        log.info("Order {} status {} -> {}", order.getOrderNumber(), from, change.getToStatus());
         events.publishEvent(new OrderStatusChangedEvent(TenantId.of(order.getTenantId()), order.getId(),
                 order.getOrderNumber(), from, change.getToStatus().name(), change.getReason()));
     }
