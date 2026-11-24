@@ -4,7 +4,7 @@
 export interface UpdateProductRequest {
   categoryId?: string;
   description?: string;
-  imageUrl?: string;
+  imageUrls?: Array<string>;
   name: string;
   priceMinor: number;
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';

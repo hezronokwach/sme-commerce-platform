@@ -3,11 +3,12 @@ package com.hezron.smecommerce.catalog.internal.application;
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
 import com.hezron.smecommerce.catalog.internal.persistence.ProductEntity;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /** What the product use cases return for one product. */
 public record ProductResult(UUID id, UUID categoryId, String name, String slug, String description,
-        long priceMinor, String currency, String imageUrl, ProductStatus status, int version,
+        long priceMinor, String currency, List<String> imageUrls, ProductStatus status, int version,
         Instant createdAt, Instant updatedAt) {
 
     static ProductResult fromEntity(ProductEntity entity) {
@@ -19,7 +20,7 @@ public record ProductResult(UUID id, UUID categoryId, String name, String slug, 
                 entity.getDescription(),
                 entity.getPriceMinor(),
                 entity.getCurrency(),
-                entity.getImageUrl(),
+                List.copyOf(entity.getImageUrls()),
                 entity.getStatus(),
                 entity.getVersion(),
                 entity.getCreatedAt(),

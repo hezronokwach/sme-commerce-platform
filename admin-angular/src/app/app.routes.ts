@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
+import { AssistantPage } from './assistant/assistant-page';
 import { authGuard } from './auth/auth.guard';
 import { ownerGuard } from './auth/owner.guard';
+import { CategoriesPage } from './categories/categories-page';
 import { AdminLayout } from './layout/admin-layout';
 import { LoginPage } from './login/login-page';
 import { OrderDetailPage } from './orders/order-detail-page';
@@ -26,8 +28,10 @@ export const routes: Routes = [
       // 'new' must come before ':productId', or the router would treat "new" as a product id.
       { path: 'products/new', component: ProductFormPage },
       { path: 'products/:productId', component: ProductFormPage },
+      { path: 'categories', component: CategoriesPage },
       { path: 'orders', component: OrdersPage },
       { path: 'orders/:orderId', component: OrderDetailPage },
+      { path: 'assistant', component: AssistantPage },
       // Both guards run: authGuard (from the parent) first, then ownerGuard.
       { path: 'settings', component: SettingsPage, canActivate: [ownerGuard] },
       // The bare address opens the products.

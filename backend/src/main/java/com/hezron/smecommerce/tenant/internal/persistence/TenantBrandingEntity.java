@@ -36,13 +36,11 @@ public class TenantBrandingEntity implements Persistable<UUID> {
     @Column(name = "accent_color")
     private String accentColor;
 
-    // logo_url and tagline are only read for now (the storefront profile shows them). Nothing sets them
-    // until shop settings exist, so they stay null; Hibernate fills them when loading.
-    @SuppressWarnings("unused")
+    /** Null until the owner adds a logo in the shop settings. */
     @Column(name = "logo_url")
     private String logoUrl;
 
-    @SuppressWarnings("unused")
+    /** One short line under the shop's name, or null. */
     private String tagline;
 
     @Column(name = "updated_at", nullable = false)
@@ -59,6 +57,14 @@ public class TenantBrandingEntity implements Persistable<UUID> {
         branding.accentColor = DEFAULT_ACCENT_COLOR;
         branding.updatedAt = Instant.now();
         return branding;
+    }
+
+    /** The owner changes the shop's look in the settings. */
+    public void changeLook(String tagline, String logoUrl, String primaryColor, String accentColor) {
+        this.tagline = tagline;
+        this.logoUrl = logoUrl;
+        this.primaryColor = primaryColor;
+        this.accentColor = accentColor;
     }
 
     /** {@link Persistable} asks for the id; for branding it is the shop's id. */

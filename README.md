@@ -12,7 +12,7 @@ Angular admin for shop staff and a React storefront for customers.
 
 | For | Feature |
 | --- | --- |
-| Shop owners and staff | Sign up from the landing page, log in (JWT with rotating refresh tokens), products and categories, stock with a full history, orders with a live feed, payment method settings, assistant documents |
+| Shop owners and staff | Sign up from the landing page, log in (JWT with rotating refresh tokens), the shop's name, logo, colours and shareable link, products with up to five photos, categories, stock with a full history, orders with a live feed, payment method settings, assistant documents |
 | Customers | Browse a shop, cart, checkout with no account, pay, watch the order status change live, ask the shop's assistant |
 | Payments | One provider interface with three providers: M-Pesa through Safaricom's Daraja API (STK push), Stripe test mode for cards, and a fake provider for development. Callbacks are idempotent; a status-query job settles payments whose callback never came; unpaid orders expire and release their stock |
 | Safety | Every query names the shop, with cross-shop tests in every module. Rate limits, CORS, an audit log of sensitive changes, and one correlation id that follows an order through the logs |

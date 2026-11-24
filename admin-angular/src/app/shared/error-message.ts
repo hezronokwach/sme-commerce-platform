@@ -8,25 +8,43 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 /** The "detail" text, written for people. Falls back to the given text if there isn't one. */
 export function messageFrom(error: unknown, fallback: string): string {
-  if (error instanceof HttpErrorResponse) {
-    if (error.status === 0) {
-      return 'The server cannot be reached. Is the backend running?';
-    }
-    const body = error.error;
-    if (body !== null && typeof body === 'object' && typeof body.detail === 'string') {
-      return body.detail;
-    }
+  if (error instanceof HttpErrorResponse && error.status === 0) {
+    return 'The server cannot be reached. Is the backend running?';
+  }
+  const body = errorBody(error);
+  if (body !== null && typeof body['detail'] === 'string') {
+    return body['detail'];
   }
   return fallback;
 }
 
 /** The "code" (e.g. CONCURRENT_UPDATE), so a page can react to one error in its own way. Null if none. */
 export function codeFrom(error: unknown): string | null {
-  if (error instanceof HttpErrorResponse) {
-    const body = error.error;
-    if (body !== null && typeof body === 'object' && typeof body.code === 'string') {
-      return body.code;
+  const body = errorBody(error);
+  if (body !== null && typeof body['code'] === 'string') {
+    return body['code'];
+  }
+  return null;
+}
+
+/**
+ * The error's JSON body as an object, or null. Endpoints that return nothing (a delete, for example)
+ * are read as text, so their error body arrives as a string and is parsed here.
+ */
+function errorBody(error: unknown): Record<string, unknown> | null {
+  if (!(error instanceof HttpErrorResponse)) {
+    return null;
+  }
+  let body: unknown = error.error;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      return null;
     }
+  }
+  if (body !== null && typeof body === 'object') {
+    return body as Record<string, unknown>;
   }
   return null;
 }

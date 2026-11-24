@@ -1,0 +1,18 @@
+@if (address() !== null) {
+  <section class="shop-link" aria-label="Your shop's link">
+    <div class="shop-link-text">
+      <p class="eyebrow">Your shop's link</p>
+      <a class="address" [href]="address()" target="_blank" rel="noopener">{{ address() }}</a>
+    </div>
+    <div class="shop-link-actions">
+      <button type="button" (click)="copy()">
+        @if (copied()) {
+          Copied
+        } @else {
+          Copy link
+        }
+      </button>
+      <a class="share" [href]="shareLink()" target="_blank" rel="noopener">Share on WhatsApp</a>
+    </div>
+  </section>
+}

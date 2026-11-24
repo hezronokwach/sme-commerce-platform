@@ -90,7 +90,7 @@ public class ProductService {
         String slug = findFreeSlug(tenantId, chooseBaseSlug(command));
         Money price = Money.of(command.priceMinor(), SHOP_CURRENCY);
         ProductEntity product = ProductEntity.newProduct(tenantId, command.categoryId(), command.name().strip(),
-                slug, command.description(), price, command.imageUrl(), status);
+                slug, command.description(), price, command.imageUrls(), status);
 
         try {
             // Flush now so a duplicate slug shows up here, where we can catch it.
@@ -130,7 +130,7 @@ public class ProductService {
                     Map.of("oldPriceMinor", product.getPriceMinor(), "newPriceMinor", command.priceMinor()));
         }
         product.changeDetails(command.categoryId(), command.name().strip(), command.description(),
-                command.priceMinor(), command.imageUrl(), command.status());
+                command.priceMinor(), command.imageUrls(), command.status());
         // Flush so the new version number is in the result. If someone saved between our check above and
         // here, @Version makes this UPDATE match no row and Hibernate throws the same lock exception.
         products.flush();

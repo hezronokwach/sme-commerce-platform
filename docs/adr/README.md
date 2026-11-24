@@ -25,3 +25,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0019](0019-mpesa-through-daraja.md) | M-Pesa through Daraja, and what happens when the customer paid but no callback came | Accepted |
 | [0020](0020-gemini-genai-client-and-groq-qwen.md) | Gemini through Spring AI's Google GenAI client, and Qwen on Groq | Accepted |
 | [0021](0021-database-on-neon.md) | The database is on Neon, not Render | Accepted |
+| [0022](0022-photos-on-cloudinary.md) | Product photos and logos on Cloudinary, uploaded straight from the browser | Accepted |

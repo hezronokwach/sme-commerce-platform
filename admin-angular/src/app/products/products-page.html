@@ -4,6 +4,8 @@
     <a class="button" routerLink="/products/new">Add product</a>
   </header>
 
+  <app-shop-link />
+
   @if (loading()) {
     <p>Loading…</p>
   } @else if (errorMessage() !== null) {
@@ -11,26 +13,36 @@
   } @else if (rows().length === 0) {
     <p>No products yet.</p>
   } @else {
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Category</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- One row per product. "track" tells Angular which row is which when the list changes. -->
-        @for (row of rows(); track row.id) {
+    <div class="table-box">
+      <table>
+        <thead>
           <tr>
-            <td><a [routerLink]="['/products', row.id]">{{ row.name }}</a></td>
-            <td class="price">{{ row.price }}</td>
-            <td>{{ row.categoryName }}</td>
-            <td>{{ row.status }}</td>
+            <th class="photo-cell"><span class="visually-hidden">Photo</span></th>
+            <th>Name</th>
+            <th class="price">Price</th>
+            <th>Category</th>
+            <th>Status</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <!-- One row per product. "track" tells Angular which row is which when the list changes. -->
+          @for (row of rows(); track row.id) {
+            <tr>
+              <td class="photo-cell">
+                @if (row.photo !== '') {
+                  <img [src]="row.photo" alt="" />
+                } @else {
+                  <span class="no-photo" aria-hidden="true"></span>
+                }
+              </td>
+              <td><a [routerLink]="['/products', row.id]">{{ row.name }}</a></td>
+              <td class="price">{{ row.price }}</td>
+              <td>{{ row.categoryName }}</td>
+              <td><span class="product-status">{{ row.status }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </main>

@@ -1,0 +1,35 @@
+<fieldset class="photos">
+  <legend>Photos</legend>
+  <p class="hint">Up to {{ max }}. The first photo is the one customers see in the shop's list.</p>
+
+  <ul class="photo-grid">
+    @for (url of photos(); track url; let index = $index) {
+      <li class="photo">
+        <img [src]="thumbnail(url)" alt="Photo {{ index + 1 }}" />
+        @if (index === 0) {
+          <span class="main-label">Main</span>
+        } @else {
+          <button type="button" class="photo-action" (click)="makeMain(index)">Make main</button>
+        }
+        <button type="button" class="remove" (click)="remove(index)" [attr.aria-label]="'Remove photo ' + (index + 1)">
+          ×
+        </button>
+      </li>
+    }
+    @for (slot of uploadingSlots(); track slot) {
+      <li class="photo uploading" aria-busy="true">Uploading…</li>
+    }
+    @if (canAddMore()) {
+      <li>
+        <label class="add-photo">
+          <input type="file" accept="image/*" multiple (change)="filesChosen($event)" />
+          <span>+ Add photos</span>
+        </label>
+      </li>
+    }
+  </ul>
+
+  @if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  }
+</fieldset>

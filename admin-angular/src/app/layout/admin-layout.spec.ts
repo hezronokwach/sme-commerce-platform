@@ -28,7 +28,7 @@ describe('AdminLayout', () => {
 
     const links = await menuLinks();
 
-    expect(links).toEqual(['Products', 'Orders', 'Settings']);
+    expect(links).toEqual(['Products', 'Categories', 'Orders', 'Assistant', 'Settings']);
   });
 
   it('hides Settings from staff', async () => {
@@ -36,7 +36,7 @@ describe('AdminLayout', () => {
 
     const links = await menuLinks();
 
-    expect(links).toEqual(['Products', 'Orders']);
+    expect(links).toEqual(['Products', 'Categories', 'Orders', 'Assistant']);
   });
 
   async function menuLinks(): Promise<string[]> {

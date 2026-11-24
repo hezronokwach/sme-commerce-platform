@@ -10,6 +10,7 @@ import com.hezron.smecommerce.catalog.internal.persistence.CategoryRepository;
 import com.hezron.smecommerce.catalog.internal.persistence.ProductEntity;
 import com.hezron.smecommerce.catalog.internal.persistence.ProductRepository;
 import com.hezron.smecommerce.shared.Money;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +81,7 @@ class CatalogDatabaseRulesTests {
     }
 
     private static ProductEntity product(UUID tenantId, UUID categoryId, String slug, Money price) {
-        return ProductEntity.newProduct(tenantId, categoryId, "Product " + slug, slug, null, price, null,
+        return ProductEntity.newProduct(tenantId, categoryId, "Product " + slug, slug, null, price, List.of(),
                 ProductStatus.ACTIVE);
     }
 

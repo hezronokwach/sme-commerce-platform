@@ -14,10 +14,14 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Persistable;
 
@@ -55,8 +59,10 @@ public class ProductEntity implements Persistable<UUID> {
 
     private String currency;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    /** Up to five photo addresses (a Postgres text[]), in the owner's order. The first is the main photo. */
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "image_urls", nullable = false)
+    private List<String> imageUrls = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
@@ -81,7 +87,7 @@ public class ProductEntity implements Persistable<UUID> {
     private boolean isNew = true;
 
     public static ProductEntity newProduct(UUID tenantId, UUID categoryId, String name, String slug,
-            String description, Money price, String imageUrl, ProductStatus status) {
+            String description, Money price, List<String> imageUrls, ProductStatus status) {
         Instant now = Instant.now();
         ProductEntity product = new ProductEntity();
         product.id = UUID.randomUUID();
@@ -92,7 +98,7 @@ public class ProductEntity implements Persistable<UUID> {
         product.description = description;
         product.priceMinor = price.amountMinor();
         product.currency = price.currency();
-        product.imageUrl = imageUrl;
+        product.imageUrls = new ArrayList<>(imageUrls);
         product.status = status;
         product.createdAt = now;
         product.updatedAt = now;
@@ -104,18 +110,26 @@ public class ProductEntity implements Persistable<UUID> {
      * page's address, so changing it would break links customers already have.
      */
     public void changeDetails(UUID categoryId, String name, String description, long priceMinor,
-            String imageUrl, ProductStatus status) {
+            List<String> imageUrls, ProductStatus status) {
         this.categoryId = categoryId;
         this.name = name;
         this.description = description;
         this.priceMinor = priceMinor;
-        this.imageUrl = imageUrl;
+        this.imageUrls = new ArrayList<>(imageUrls);
         this.status = status;
     }
 
     /** Off sale for good. The row stays, because past orders point at it. */
     public void archive() {
         this.status = ProductStatus.ARCHIVED;
+    }
+
+    /** The main photo (the first one), or null when the product has none. */
+    public String getMainImageUrl() {
+        if (imageUrls.isEmpty()) {
+            return null;
+        }
+        return imageUrls.get(0);
     }
 
     /** The two money columns as one value. */

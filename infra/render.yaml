@@ -48,4 +48,11 @@ services:
         sync: false
       - key: MPESA_CALLBACK_SECRET
         generateValue: true
+      # Product photos and shop logos (ADR 0022), from cloudinary.com > Settings > API Keys.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 

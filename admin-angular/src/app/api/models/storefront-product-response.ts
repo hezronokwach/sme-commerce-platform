@@ -7,6 +7,7 @@ export interface StorefrontProductResponse {
   description?: string;
   id?: string;
   imageUrl?: string;
+  imageUrls?: Array<string>;
   name?: string;
   priceMinor?: number;
   slug?: string;

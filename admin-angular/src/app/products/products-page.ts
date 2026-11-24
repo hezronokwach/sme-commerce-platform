@@ -6,12 +6,16 @@ import { productList } from '../api/fn/product/product-list';
 import { CategoryResponse } from '../api/models/category-response';
 import { ProductResponse } from '../api/models/product-response';
 import { formatPrice } from './format-price';
+import { ShopLink } from '../shared/shop-link';
+import { thumbnailOf } from '../shared/photo-upload';
 import { textOrEmpty } from '../shared/text-or-empty';
 
 /** One table row: what the page shows for a product. */
 interface ProductRow {
   id: string;
   name: string;
+  /** A small copy of the main photo, or '' when the product has none. */
+  photo: string;
   price: string;
   categoryName: string;
   status: string;
@@ -23,7 +27,7 @@ interface ProductRow {
  */
 @Component({
   selector: 'app-products-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ShopLink],
   templateUrl: './products-page.html',
   styleUrl: './products-page.css',
 })
@@ -68,9 +72,15 @@ export function buildRows(products: ProductResponse[], categories: CategoryRespo
       }
     }
 
+    let photo = '';
+    if (product.imageUrl !== undefined) {
+      photo = thumbnailOf(product.imageUrl, 96);
+    }
+
     rows.push({
       id: textOrEmpty(product.id),
       name: textOrEmpty(product.name),
+      photo: photo,
       price: formatPrice(product.priceMinor, product.currency),
       categoryName: categoryName,
       status: textOrEmpty(product.status),

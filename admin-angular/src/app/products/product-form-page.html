@@ -48,6 +48,8 @@
         <textarea name="description" rows="4" maxlength="5000" [(ngModel)]="description"></textarea>
       </label>
 
+      <app-photo-picker [(photos)]="photos" />
+
       @if (conflict()) {
         <div class="conflict" role="alert">
           <p>Someone else changed this product while you were editing it, so your change was not saved.</p>

@@ -61,7 +61,7 @@ class CatalogApiTests {
     private UUID saveProduct(UUID tenantId, String name, long priceMinor, ProductStatus status) {
         String slug = "p-" + UUID.randomUUID().toString().substring(0, 8);
         ProductEntity product = ProductEntity.newProduct(tenantId, null, name, slug, null,
-                Money.of(priceMinor, "KES"), null, status);
+                Money.of(priceMinor, "KES"), List.of(), status);
         products.saveAndFlush(product);
         return product.getId();
     }

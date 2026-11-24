@@ -1,13 +1,20 @@
 .products {
-  max-width: 900px;
-  margin: 40px auto;
+  max-width: 960px;
+  margin: 32px auto;
   padding: 0 16px;
 }
 
 header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  margin: 0;
 }
 
 .button {
@@ -19,6 +26,11 @@ header {
   text-decoration: none;
 }
 
+/* Wide tables scroll sideways inside their box on a phone, instead of the whole page. */
+.table-box {
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -26,14 +38,48 @@ table {
 
 th,
 td {
-  padding: 8px;
+  padding: 10px 12px;
   text-align: left;
+  vertical-align: middle;
   border-bottom: 1px solid var(--border);
 }
 
-.price {
+/* The heading and the values of a column line up: both right-aligned for prices. */
+th.price,
+td.price {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.photo-cell {
+  width: 64px;
+}
+
+.photo-cell img,
+.no-photo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--sand);
+}
+
+.product-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .error {

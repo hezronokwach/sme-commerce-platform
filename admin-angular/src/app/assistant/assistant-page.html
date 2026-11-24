@@ -1,0 +1,77 @@
+<main class="page">
+  <h1>Assistant</h1>
+  <p class="hint">
+    Customers can ask your shop questions. The assistant answers only from your products and the texts you upload
+    here, and says when it doesn't know.
+  </p>
+
+  @if (isOwner()) {
+    <section class="panel">
+      <h2>Add a text</h2>
+      <p class="hint">A .txt or .md file up to 2 MB: delivery and returns, opening hours, how to pay, sizes...</p>
+      <form #uploadForm class="upload" (ngSubmit)="upload(uploadForm)">
+        <label>
+          Title
+          <input name="title" maxlength="160" placeholder="e.g. Delivery and returns" [(ngModel)]="title" />
+        </label>
+        <label>
+          File
+          <input name="file" type="file" accept=".txt,.md,text/plain,text/markdown" (change)="fileChosen($event)" />
+        </label>
+        <div>
+          <button type="submit" [disabled]="busy()">
+            @if (busy()) {
+              Uploading…
+            } @else {
+              Upload
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  }
+  @if (infoMessage() !== null) {
+    <p class="info" role="status">{{ infoMessage() }}</p>
+  }
+
+  <h2>Your texts</h2>
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (uploads().length === 0) {
+    <p class="hint">Nothing uploaded yet.</p>
+  } @else {
+    <ul class="documents">
+      @for (row of uploads(); track row.id) {
+        <li class="document">
+          <div>
+            <span class="title">{{ row.title }}</span>
+            <span class="meta">Uploaded {{ row.uploaded }}</span>
+            @if (row.error !== '') {
+              <span class="meta error">{{ row.error }}</span>
+            }
+          </div>
+          <div class="document-actions">
+            <span class="badge badge-{{ row.status }}">{{ row.statusText }}</span>
+            @if (isOwner()) {
+              <button type="button" class="quiet danger" (click)="remove(row)">Delete</button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <section class="products-note">
+    <h2>Your products</h2>
+    <p class="hint">
+      The assistant knows {{ productCount() }} of your products. It learns new and changed products by itself.
+    </p>
+    @if (isOwner()) {
+      <button type="button" class="quiet" [disabled]="busy()" (click)="learnProducts()">Read all products again</button>
+    }
+  </section>
+</main>

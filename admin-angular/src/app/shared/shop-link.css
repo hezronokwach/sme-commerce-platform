@@ -1,0 +1,41 @@
+.shop-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--sand);
+}
+
+.shop-link-text {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+}
+
+.address {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.shop-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.share {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}

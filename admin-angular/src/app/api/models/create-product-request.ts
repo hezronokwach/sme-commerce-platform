@@ -4,7 +4,7 @@
 export interface CreateProductRequest {
   categoryId?: string;
   description?: string;
-  imageUrl?: string;
+  imageUrls?: Array<string>;
   name: string;
   priceMinor: number;
   slug?: string;
