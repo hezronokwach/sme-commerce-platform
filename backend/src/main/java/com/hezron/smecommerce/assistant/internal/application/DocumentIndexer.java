@@ -58,7 +58,7 @@ class DocumentIndexer {
             // Only the message, and only ours to keep: provider errors never contain our key.
             log.warn("Indexing document {} failed: {}", job.documentId(), e.getMessage());
             chunks.removeFor(job.documentId());
-            steps.fail(job, "Indexing failed: " + e.getMessage());
+            steps.fail(job, "Indexing failed: the embedding service didn't answer. Please try again.");
             return;
         }
 

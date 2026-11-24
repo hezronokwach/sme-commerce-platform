@@ -340,6 +340,42 @@
         }
       }
     },
+    "/api/store/{shopSlug}/assistant/ask" : {
+      "post" : {
+        "tags" : [ "StorefrontAssistant" ],
+        "operationId" : "storefrontAssistantAsk",
+        "parameters" : [ {
+          "name" : "shopSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AnswerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/signup" : {
       "post" : {
         "tags" : [ "Auth" ],
@@ -1392,6 +1428,31 @@
           }
         },
         "required" : [ "orderToken" ]
+      },
+      "AskRequest" : {
+        "type" : "object",
+        "properties" : {
+          "question" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "question" ]
+      },
+      "AnswerResponse" : {
+        "type" : "object",
+        "properties" : {
+          "answer" : {
+            "type" : "string"
+          },
+          "sources" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
       },
       "SignUpRequest" : {
         "type" : "object",
