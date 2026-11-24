@@ -28,6 +28,8 @@ The steps that need your accounts. The repo already holds the configuration (ADR
    - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`: card payments in test mode;
    - `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`: the Daraja sandbox app;
    - `MPESA_CALLBACK_BASE_URL`: this service's address, `https://sme-commerce-api.onrender.com`;
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: product photos and shop logos
+     (cloudinary.com > Settings > API Keys; the free plan is enough);
    - `CORS_ALLOWED_ORIGINS`: the two Vercel addresses, comma separated (leave it empty until section 4).
 
    The key values are the same ones as in your local `backend/.env`. Empty is fine for any of the
