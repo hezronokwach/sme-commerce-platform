@@ -1,6 +1,7 @@
 package com.hezron.smecommerce.tenant.internal.application;
 
 import com.hezron.smecommerce.shared.TenantId;
+import com.hezron.smecommerce.tenant.ActiveShop;
 import com.hezron.smecommerce.tenant.ShopNotFoundException;
 import com.hezron.smecommerce.tenant.SlugNotAllowedException;
 import com.hezron.smecommerce.tenant.SlugTakenException;
@@ -11,6 +12,7 @@ import com.hezron.smecommerce.tenant.internal.persistence.TenantBrandingReposito
 import com.hezron.smecommerce.tenant.internal.persistence.TenantEntity;
 import com.hezron.smecommerce.tenant.internal.persistence.TenantRepository;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -78,6 +80,17 @@ class TenantService implements TenantApi {
                 .filter(TenantEntity::isActive)
                 .map(tenant -> TenantId.of(tenant.getId()))
                 .orElseThrow(() -> new ShopNotFoundException(slug));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ActiveShop findActiveShopBySlug(String slug) {
+        Optional<TenantEntity> found = tenants.findBySlug(normaliseSlug(slug));
+        if (found.isEmpty() || !found.get().isActive()) {
+            throw new ShopNotFoundException(slug);
+        }
+        TenantEntity tenant = found.get();
+        return new ActiveShop(TenantId.of(tenant.getId()), tenant.getName());
     }
 
     @Override

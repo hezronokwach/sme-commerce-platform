@@ -116,6 +116,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/store/{shopSlug}/assistant/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["storefrontAssistantAsk"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/signup": {
         parameters: {
             query?: never;
@@ -629,6 +645,13 @@ export interface components {
         TryPaymentAgainRequest: {
             orderToken: string;
         };
+        AskRequest: {
+            question: string;
+        };
+        AnswerResponse: {
+            answer?: string;
+            sources?: string[];
+        };
         SignUpRequest: {
             shopName: string;
             shopSlug: string;
@@ -1091,6 +1114,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    storefrontAssistantAsk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shopSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerResponse"];
+                };
             };
         };
     };

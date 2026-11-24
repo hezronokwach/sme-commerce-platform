@@ -37,6 +37,8 @@ export type { StreamTicketForStaff$Params as StreamTicketForStaff$Params } from 
 export { streamTicketForStaff as streamTicketForStaff } from './fn/stream-ticket/stream-ticket-for-staff';
 export type { StreamTicketForShopFeed$Params as StreamTicketForShopFeed$Params } from './fn/stream-ticket/stream-ticket-for-shop-feed';
 export { streamTicketForShopFeed as streamTicketForShopFeed } from './fn/stream-ticket/stream-ticket-for-shop-feed';
+export type { StorefrontAssistantAsk$Params as StorefrontAssistantAsk$Params } from './fn/storefront-assistant/storefront-assistant-ask';
+export { storefrontAssistantAsk as storefrontAssistantAsk } from './fn/storefront-assistant/storefront-assistant-ask';
 export type { AuthSignUp$Params as AuthSignUp$Params } from './fn/auth/auth-sign-up';
 export { authSignUp as authSignUp } from './fn/auth/auth-sign-up';
 export type { AuthRefresh$Params as AuthRefresh$Params } from './fn/auth/auth-refresh';

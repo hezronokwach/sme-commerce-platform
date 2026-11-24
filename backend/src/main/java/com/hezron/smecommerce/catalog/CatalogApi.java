@@ -22,4 +22,12 @@ public interface CatalogApi {
      */
     List<ActiveProductView> listActiveProducts(TenantId tenantId);
 
+    /**
+     * The open shop behind a storefront's web name. The assistant asks here because its only allowed
+     * dependency for shop data is catalog (ADR 0016).
+     *
+     * @throws com.hezron.smecommerce.tenant.ShopNotFoundException if there is no such open shop
+     */
+    StorefrontShop findStorefrontShop(String slug);
+
 }

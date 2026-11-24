@@ -30,4 +30,10 @@ public class TestcontainersConfiguration {
         return new FakeEmbeddingModel();
     }
 
+    @Bean
+    @Primary
+    FakeChatModel fakeChatModel() {
+        return new FakeChatModel();
+    }
+
 }

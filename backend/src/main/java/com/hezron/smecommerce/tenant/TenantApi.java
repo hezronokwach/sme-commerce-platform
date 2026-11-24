@@ -26,6 +26,13 @@ public interface TenantApi {
     TenantId findActiveTenantIdBySlug(String slug);
 
     /**
+     * The same lookup, for callers that also need the shop's name.
+     *
+     * @throws ShopNotFoundException if no shop has this slug, or the shop is suspended
+     */
+    ActiveShop findActiveShopBySlug(String slug);
+
+    /**
      * Whether this shop offers this way of paying (FAKE, CARD or MPESA), as its owner set it. Payments
      * asks before starting a payment, so a method the shop turned off can never be used.
      */
