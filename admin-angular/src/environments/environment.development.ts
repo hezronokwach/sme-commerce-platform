@@ -4,4 +4,6 @@ export const environment = {
   // (proxy.conf.json) forwards every /api/... call to the backend on http://localhost:8081, so the
   // browser sees one site: no CORS setup needed, and the refresh cookie works.
   apiBaseUrl: '',
+  // The storefront's dev server (npm run dev in storefront-react).
+  storefrontUrl: 'http://localhost:5173',
 };

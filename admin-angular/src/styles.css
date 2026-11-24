@@ -1,39 +1,290 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Styles for the whole admin: the same warm beige, nude and espresso as the storefront, so both feel
+ * like one product. Each page's own .css adds only its layout.
+ */
+:root {
+  --bg: #f5f0e8;
+  --surface: #fbf8f3;
+  --sand: #ece3d6;
+  --nude: #dcc9b3;
+  --text: #1f1b17;
+  --muted: #6f6458;
+  --border: #e3d8c9;
+  --primary: #1f1b17;
+  --accent: #b4532a;
+  --danger: #a3301f;
+  --success: #3f6b4a;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Instrument Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  padding: 8px 16px;
+  border: 1px solid var(--text);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The main action of a form: dark and filled. */
+button.primary,
+button[type='submit'] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+table {
+  background: var(--surface);
+  border-radius: 12px;
+}
+
+th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 
 /* The content area of every logged-in page, under the menu. */
 .page {
-  max-width: 900px;
-  margin: 24px auto;
+  max-width: 960px;
+  margin: 32px auto;
   padding: 0 16px;
 }
 
 /* An order's status as a small coloured label (orders list and order page). */
 .status {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 999px;
-  font-size: 0.875em;
-  background: #e5e7eb;
-  color: #374151;
+  font-size: 0.8em;
+  font-weight: 600;
+  background: var(--sand);
+  color: var(--muted);
 }
 
 .status-PENDING_PAYMENT {
-  background: #fef3c7;
-  color: #92400e;
+  background: #f3e3c9;
+  color: #7a4a12;
 }
 
 .status-PAID {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #f1d9cc;
+  color: var(--accent);
 }
 
 .status-FULFILLED {
-  background: #dcfce7;
-  color: #166534;
+  background: #e1e9dc;
+  color: var(--success);
 }
 
 .status-CANCELLED,
 .status-EXPIRED {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #f2dcd6;
+  color: var(--danger);
+}
+
+/* --- log-in and sign-up: a dark panel beside the form, just the form on a phone --- */
+.auth {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+.auth-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 16px;
+  background: var(--text);
+  color: #f5f0e8;
+}
+
+.auth-wordmark {
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-side-text {
+  display: none;
+}
+
+.auth-side .eyebrow {
+  color: rgb(245 240 232 / 65%);
+}
+
+.auth-quote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.auth-quote em {
+  color: #e0a17f;
+}
+
+.auth-points {
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(245 240 232 / 75%);
+}
+
+.auth-points li {
+  padding: 10px 0;
+  border-top: 1px solid rgb(245 240 232 / 15%);
+}
+
+.auth-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 64px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 2.4rem;
+}
+
+.auth-sub {
+  margin: 8px 0 28px;
+  color: var(--muted);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-form input {
+  min-height: 48px;
+  font-weight: normal;
+}
+
+.auth-form .hint {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.auth-form button {
+  min-height: 50px;
+  margin-top: 8px;
+}
+
+.auth-form .error {
+  margin: 0;
+  color: var(--danger);
+}
+
+@media (min-width: 900px) {
+  .auth {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .auth-side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 40px 48px;
+  }
+
+  .auth-side-text {
+    display: block;
+    margin-bottom: auto;
+    margin-top: auto;
+  }
+
+  .auth-main {
+    align-items: center;
+    padding: 48px;
+  }
 }

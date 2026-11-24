@@ -12,11 +12,11 @@ export function CartPage() {
 
   if (lines.length === 0) {
     return (
-      <>
+      <div className="cart-page">
         <h1>Your cart</h1>
         <p>Your cart is empty.</p>
         <Link to={`/s/${slug}`}>Continue shopping</Link>
-      </>
+      </div>
     )
   }
 
@@ -26,7 +26,7 @@ export function CartPage() {
   }
 
   return (
-    <>
+    <div className="cart-page">
       <h1>Your cart</h1>
       <ul className="cart-lines">
         {lines.map((line) => (
@@ -51,7 +51,7 @@ export function CartPage() {
           Checkout
         </Link>
       </div>
-    </>
+    </div>
   )
 }
 

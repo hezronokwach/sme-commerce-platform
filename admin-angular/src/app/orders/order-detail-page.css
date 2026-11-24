@@ -18,7 +18,7 @@ header {
 }
 
 .facts dt {
-  color: #555;
+  color: var(--muted);
 }
 
 .facts dd {
@@ -34,7 +34,7 @@ th,
 td {
   padding: 8px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 tfoot th {
@@ -53,7 +53,7 @@ tfoot th {
   list-style: none;
   padding: 0;
   margin: 0;
-  border-left: 2px solid #ddd;
+  border-left: 2px solid var(--border);
 }
 
 .timeline li {
@@ -77,9 +77,9 @@ tfoot th {
 
 .when,
 .reason {
-  color: #555;
+  color: var(--muted);
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--danger);
 }

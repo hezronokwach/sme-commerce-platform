@@ -1,5 +1,5 @@
 .hint {
-  color: #555;
+  color: var(--muted);
 }
 
 /* Scrolls inside its box on a phone instead of stretching the page. */
@@ -14,12 +14,12 @@ th,
 td {
   padding: 8px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--danger);
 }
 
 .payment-methods {

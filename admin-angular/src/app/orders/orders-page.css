@@ -28,7 +28,7 @@ th,
 td {
   padding: 8px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
@@ -45,7 +45,7 @@ td {
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--danger);
 }
 
 /* The live feed's badge next to the heading. */

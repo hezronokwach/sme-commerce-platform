@@ -51,7 +51,7 @@ export function AssistantPanel({ slug, shopName }: { slug: string; shopName: str
   return (
     <section className="assistant-panel" aria-label={`Assistant for ${shopName}`}>
       <div className="assistant-header">
-        <strong>Ask {shopName}</strong>
+        <h2>Ask {shopName}</h2>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close the assistant">
           ×
         </button>
