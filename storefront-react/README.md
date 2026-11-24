@@ -7,7 +7,7 @@ Vite + React 19 + TypeScript 6, React Router, Vitest + Testing Library. Node 22.
 
 ## Run it
 
-The backend must be running on port 8080 (see `backend/`). Then:
+The backend must be running on port 8081 (see `backend/`). Then:
 
 ```bash
 npm install

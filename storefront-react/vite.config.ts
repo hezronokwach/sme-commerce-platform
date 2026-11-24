@@ -13,7 +13,7 @@ export default defineConfig({
     // SSE (the order stream, issue #19) goes through this proxy too.
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: false,
       },
     },

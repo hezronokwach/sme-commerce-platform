@@ -10,7 +10,7 @@ Angular 22 (standalone components, Vitest). Needs Node 22.22.3+ or 24.15+.
 3. `npm start`, then open http://localhost:4200.
 
 `npm start` runs `ng serve` with `proxy.conf.json`: calls to `/api/...` are forwarded to the backend on
-http://localhost:8080, so the browser sees one site (no CORS needed locally).
+http://localhost:8081, so the browser sees one site (no CORS needed locally).
 
 ## Other commands
 
