@@ -8,11 +8,13 @@ import { OrdersPage } from './orders/orders-page';
 import { ProductFormPage } from './products/product-form-page';
 import { ProductsPage } from './products/products-page';
 import { SettingsPage } from './settings/settings-page';
+import { SignupPage } from './signup/signup-page';
 
 /** Which page each address shows. The first matching entry wins. */
 export const routes: Routes = [
-  // The login page has no menu, so it sits outside the layout.
+  // Log-in and sign-up have no menu, so they sit outside the layout.
   { path: 'login', component: LoginPage },
+  { path: 'signup', component: SignupPage },
   {
     // Every logged-in page sits inside AdminLayout (the menu). authGuard here protects all the
     // children at once: logged-out users are sent to /login.

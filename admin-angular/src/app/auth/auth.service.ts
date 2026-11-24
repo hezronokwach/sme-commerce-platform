@@ -3,6 +3,8 @@ import { Api } from '../api/api';
 import { authLogin } from '../api/fn/auth/auth-login';
 import { authLogout } from '../api/fn/auth/auth-logout';
 import { authRefresh } from '../api/fn/auth/auth-refresh';
+import { authSignUp } from '../api/fn/auth/auth-sign-up';
+import { SignUpRequest } from '../api/models/sign-up-request';
 import { TokenResponse } from '../api/models/token-response';
 import { roleFromToken } from './token-role';
 
@@ -56,6 +58,20 @@ export class AuthService {
   async login(email: string, password: string): Promise<void> {
     const tokens = await this.api.invoke(authLogin, { body: { email: email, password: password } });
     this.rememberToken(tokens);
+  }
+
+  /**
+   * Creates a new shop and its owner, and logs the owner in: the backend answers with an access token
+   * and sets the refresh cookie, just like a login. Throws the HTTP error if it says no (web name or
+   * email taken, password too short, ...); the sign-up page shows the error's message.
+   */
+  async signUp(request: SignUpRequest): Promise<void> {
+    const answer = await this.api.invoke(authSignUp, { body: request });
+    if (answer.accessToken === undefined) {
+      this.accessToken.set(null);
+    } else {
+      this.accessToken.set(answer.accessToken);
+    }
   }
 
   /**

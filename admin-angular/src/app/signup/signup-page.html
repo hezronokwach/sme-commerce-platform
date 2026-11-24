@@ -1,0 +1,76 @@
+<div class="auth">
+  <aside class="auth-side">
+    <a class="auth-wordmark" [href]="homeUrl">SME Commerce</a>
+    <div class="auth-side-text">
+      <p class="eyebrow">For small shops in Kenya</p>
+      <p class="auth-quote">Your shop online. Paid by <em>M-Pesa</em>.</p>
+      <ul class="auth-points">
+        <li>Customers order without an account</li>
+        <li>M-Pesa and card in one checkout</li>
+        <li>Orders turn Paid on their own</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <p class="eyebrow">Sign up</p>
+      <h1>Open your shop</h1>
+      <p class="auth-sub">Already have one? <a routerLink="/login">Log in</a></p>
+
+      <form class="auth-form" (ngSubmit)="signUp()" novalidate>
+        <label>
+          Shop name
+          <input
+            name="shopName"
+            autocomplete="organization"
+            required
+            [ngModel]="shopName"
+            (ngModelChange)="shopNameChanged($event)"
+          />
+        </label>
+
+        <label>
+          Web name
+          <input
+            name="webName"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+            [ngModel]="webName"
+            (ngModelChange)="webNameChanged($event)"
+          />
+          <span class="hint">Your shop's address: {{ storefrontUrl }}/s/{{ webName || 'your-shop' }}</span>
+        </label>
+
+        <label>
+          Your name
+          <input name="ownerName" autocomplete="name" required [(ngModel)]="ownerName" />
+        </label>
+
+        <label>
+          Email
+          <input name="email" type="email" autocomplete="email" required [(ngModel)]="email" />
+        </label>
+
+        <label>
+          Password
+          <input name="password" type="password" autocomplete="new-password" required [(ngModel)]="password" />
+          <span class="hint">At least 10 characters.</span>
+        </label>
+
+        <button type="submit" class="primary" [disabled]="busy()">
+          @if (busy()) {
+            Opening your shop…
+          } @else {
+            Open your shop
+          }
+        </button>
+
+        @if (errorMessage() !== null) {
+          <p class="error" role="alert">{{ errorMessage() }}</p>
+        }
+      </form>
+    </div>
+  </main>
+</div>
