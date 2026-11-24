@@ -21,3 +21,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0015](0015-assistant-ingestion-gemini-embeddings.md) | Assistant ingestion: Gemini embeddings, our own chunking, Flyway-owned vector table | Accepted |
 | [0016](0016-assistant-answers-from-the-shops-own-text.md) | The assistant answers only from the shop's own text, within a daily budget | Accepted |
 | [0017](0017-hardening-and-observability.md) | Hardening and observability | Accepted |
+| [0018](0018-deploy-on-render-and-vercel.md) | Deploy on Render and Vercel, with Vercel passing /api through | Accepted |
