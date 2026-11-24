@@ -48,6 +48,17 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      # This service's own address, for example https://sme-commerce-api.onrender.com
+      - key: MPESA_CALLBACK_BASE_URL
+        sync: false
+      - key: MPESA_CALLBACK_SECRET
+        generateValue: true
 
 databases:
   - name: sme-commerce-db
