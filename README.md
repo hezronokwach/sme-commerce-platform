@@ -49,7 +49,7 @@ flowchart LR
     N -. listens .-> O & P
     Backend --> DB[(PostgreSQL + pgvector<br/>one schema per module)]
     P --> Prov[Payment providers]
-    AS --> AI[Gemini embeddings<br/>Groq chat]
+    AS --> AI[Gemini embeddings<br/>Groq chat, Qwen 3.8]
 ```
 
 - **Modules talk only through public APIs or events.** Solid arrows are calls, dotted arrows are events.
@@ -111,8 +111,10 @@ The backend has over 300 tests against a real Postgres (Testcontainers), includi
 test and cross-shop tests. The frontends run `npm test`. CI runs all of them on every pull request, plus
 a secret scan, a dependency CVE scan and a Docker image build.
 
-The assistant also has a 15-question evaluation with real models (`AssistantEvaluationTests`). It is
-run on request and writes its score to `docs/assistant-evaluation.md`.
+The assistant also has a 15-question evaluation with real models (`AssistantEvaluationTests`): two
+shops, questions each shop's text answers, and questions about the other shop that it must not answer.
+It scores **15 of 15** with Gemini embeddings and Qwen 3.8 on Groq
+([results](docs/assistant-evaluation.md)). It is run on request, because it calls the real APIs.
 
 ## Decisions
 
