@@ -3,10 +3,13 @@ package com.hezron.smecommerce.catalog.internal.application;
 import com.hezron.smecommerce.catalog.ActiveProductView;
 import com.hezron.smecommerce.catalog.CatalogApi;
 import com.hezron.smecommerce.catalog.PriceSnapshot;
+import com.hezron.smecommerce.catalog.StorefrontShop;
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
 import com.hezron.smecommerce.catalog.internal.persistence.ProductEntity;
 import com.hezron.smecommerce.catalog.internal.persistence.ProductRepository;
 import com.hezron.smecommerce.shared.TenantId;
+import com.hezron.smecommerce.tenant.ActiveShop;
+import com.hezron.smecommerce.tenant.TenantApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,9 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 class CatalogApiService implements CatalogApi {
 
     private final ProductRepository products;
+    private final TenantApi tenantApi;
 
-    CatalogApiService(ProductRepository products) {
+    CatalogApiService(ProductRepository products, TenantApi tenantApi) {
         this.products = products;
+        this.tenantApi = tenantApi;
+    }
+
+    @Override
+    public StorefrontShop findStorefrontShop(String slug) {
+        ActiveShop shop = tenantApi.findActiveShopBySlug(slug);
+        return new StorefrontShop(shop.tenantId(), shop.name());
     }
 
     @Override
