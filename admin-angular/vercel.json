@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "dist/sme-admin/browser",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://sme-commerce-api.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
