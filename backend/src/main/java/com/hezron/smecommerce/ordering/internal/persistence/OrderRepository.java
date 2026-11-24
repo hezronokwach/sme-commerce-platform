@@ -33,6 +33,9 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
     /** One page of the shop's orders in one status. */
     Page<OrderEntity> findAllByTenantIdAndStatus(UUID tenantId, OrderStatus status, Pageable pageable);
 
+    /** How many orders this phone placed in this shop since the given moment. */
+    long countByTenantIdAndCustomerPhoneAndCreatedAtAfter(UUID tenantId, String customerPhone, Instant since);
+
     /**
      * The same order, LOCKED until the transaction ends ({@code SELECT ... FOR UPDATE}). Used by the two
      * things that may change an unpaid order at the same moment, the expiry job and a payment result, so

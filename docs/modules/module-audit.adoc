@@ -2,4 +2,8 @@
 |===
 |Base package
 |`com.hezron.smecommerce.audit`
+|Spring components
+|_Services_
+
+* `c.h.s.a.AuditApi` (via `c.h.s.a.internal.AuditService`)
 |===

@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,10 +56,12 @@ public class PlaceOrderService {
     private final OrderLineRepository orderLines;
     private final OrderStatusRecorder statusRecorder;
     private final ApplicationEventPublisher events;
+    private final int ordersPerPhonePerMinute;
 
     PlaceOrderService(TenantApi tenantApi, CatalogApi catalogApi, IdentityApi identityApi, InventoryApi inventoryApi,
             PaymentsApi paymentsApi, OrderNumberService orderNumbers, OrderRepository orders,
-            OrderLineRepository orderLines, OrderStatusRecorder statusRecorder, ApplicationEventPublisher events) {
+            OrderLineRepository orderLines, OrderStatusRecorder statusRecorder, ApplicationEventPublisher events,
+            @Value("${app.ordering.orders-per-phone-per-minute:10}") int ordersPerPhonePerMinute) {
         this.tenantApi = tenantApi;
         this.catalogApi = catalogApi;
         this.identityApi = identityApi;
@@ -69,6 +72,7 @@ public class PlaceOrderService {
         this.orderLines = orderLines;
         this.statusRecorder = statusRecorder;
         this.events = events;
+        this.ordersPerPhonePerMinute = ordersPerPhonePerMinute;
     }
 
     /**
@@ -91,6 +95,12 @@ public class PlaceOrderService {
         // 2. Check what the customer sent.
         checkNoProductTwice(command.lines());
         PhoneNumber phone = PhoneNumber.parse(command.customerPhone());
+        // Each order can send a PIN prompt to this phone, so nobody may flood someone else's phone.
+        long recentOrders = orders.countByTenantIdAndCustomerPhoneAndCreatedAtAfter(tenant, phone.value(),
+                Instant.now().minus(Duration.ofMinutes(1)));
+        if (recentOrders >= ordersPerPhonePerMinute) {
+            throw new TooManyOrdersException();
+        }
 
         // 3. The server's current prices. Whatever price the browser may have sent is never read.
         Map<UUID, PriceSnapshot> prices = currentPrices(tenantId, command.lines());

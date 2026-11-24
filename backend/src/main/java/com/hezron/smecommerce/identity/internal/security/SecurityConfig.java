@@ -1,13 +1,21 @@
 package com.hezron.smecommerce.identity.internal.security;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -15,6 +23,10 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
@@ -46,6 +58,8 @@ class SecurityConfig {
                 (request, response, exception) -> errorResolver.resolveException(request, response, null, exception);
 
         http
+                // Browsers may only call this API from our own two frontends (the bean below).
+                .cors(Customizer.withDefaults())
                 // Tokens travel in a header the browser never adds by itself, so there is nothing for CSRF to abuse.
                 .csrf(AbstractHttpConfigurer::disable)
                 // No server-side session: every request proves itself with its token.
@@ -53,6 +67,9 @@ class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        // Metrics cover every shop, so they are only readable on the server itself.
+                        .requestMatchers("/actuator/metrics", "/actuator/metrics/**")
+                        .access(SecurityConfig::onlyFromThisMachine)
                         // The API description and Swagger UI only describe endpoints; each endpoint still
                         // checks its own token. (The deployment issue decides whether prod hides them.)
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
@@ -79,6 +96,34 @@ class SecurityConfig {
                         .authenticationEntryPoint(whenNotLoggedIn)
                         .accessDeniedHandler(whenNotAllowed));
         return http.build();
+    }
+
+    /**
+     * Which websites may call this API from a browser. Set by CORS_ALLOWED_ORIGINS when deployed.
+     * Credentials are allowed because the refresh token travels in a cookie.
+     */
+    @Bean
+    CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origins}") List<String> origins) {
+        CorsConfiguration rules = new CorsConfiguration();
+        rules.setAllowedOrigins(origins);
+        rules.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        rules.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Order-Token", "X-Correlation-Id"));
+        rules.setExposedHeaders(List.of("X-Correlation-Id"));
+        rules.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", rules);
+        return source;
+    }
+
+    private static AuthorizationDecision onlyFromThisMachine(Supplier<? extends Authentication> authentication,
+            RequestAuthorizationContext context) {
+        try {
+            InetAddress caller = InetAddress.getByName(context.getRequest().getRemoteAddr());
+            return new AuthorizationDecision(caller.isLoopbackAddress());
+        } catch (UnknownHostException notAnAddress) {
+            return new AuthorizationDecision(false);
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ import com.hezron.smecommerce.payments.internal.provider.StatusResult;
 import com.hezron.smecommerce.shared.TenantId;
 import java.util.Optional;
 import java.util.UUID;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,13 +44,15 @@ public class PaymentCallbackService {
     private final PaymentRepository payments;
     private final CallbackLogRepository callbackLog;
     private final ApplicationEventPublisher events;
+    private final MeterRegistry metrics;
 
     PaymentCallbackService(PaymentProviders providers, PaymentRepository payments, CallbackLogRepository callbackLog,
-            ApplicationEventPublisher events) {
+            ApplicationEventPublisher events, MeterRegistry metrics) {
         this.providers = providers;
         this.payments = payments;
         this.callbackLog = callbackLog;
         this.events = events;
+        this.metrics = metrics;
     }
 
     /** Handles one callback body from a provider and says what was done with it. */
@@ -159,6 +162,7 @@ public class PaymentCallbackService {
         }
 
         payment.succeed(result.receiptNumber(), result.resultCode());
+        countResult(providerName, "SUCCEEDED");
         events.publishEvent(new PaymentSucceededEvent(TenantId.of(payment.getTenantId()), payment.getOrderId(),
                 payment.getId(), result.receiptNumber(), payment.getAmountMinor()));
         return record(providerName, result.providerReference(), rawBody, CallbackOutcome.APPLIED);
@@ -170,9 +174,15 @@ public class PaymentCallbackService {
         boolean retryable = PaymentResultCodes.isRetryable(result.resultCode());
 
         payment.fail(reason, result.resultCode());
+        countResult(providerName, "FAILED");
         events.publishEvent(new PaymentFailedEvent(TenantId.of(payment.getTenantId()), payment.getOrderId(),
                 payment.getId(), reason, retryable));
         return record(providerName, result.providerReference(), rawBody, CallbackOutcome.APPLIED);
+    }
+
+    /** Payment results per provider, at /actuator/metrics/sme.payments.results. */
+    private void countResult(PaymentProviderName provider, String outcome) {
+        metrics.counter("sme.payments.results", "provider", provider.name(), "outcome", outcome).increment();
     }
 
     private CallbackOutcome record(PaymentProviderName provider, String reference, String rawBody,

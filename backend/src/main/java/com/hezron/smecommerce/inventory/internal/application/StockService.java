@@ -1,5 +1,6 @@
 package com.hezron.smecommerce.inventory.internal.application;
 
+import com.hezron.smecommerce.audit.AuditApi;
 import com.hezron.smecommerce.inventory.StockLowEvent;
 import com.hezron.smecommerce.inventory.internal.domain.MovementReason;
 import com.hezron.smecommerce.inventory.internal.persistence.StockItemEntity;
@@ -7,6 +8,7 @@ import com.hezron.smecommerce.inventory.internal.persistence.StockItemRepository
 import com.hezron.smecommerce.inventory.internal.persistence.StockMovementEntity;
 import com.hezron.smecommerce.inventory.internal.persistence.StockMovementRepository;
 import com.hezron.smecommerce.shared.TenantId;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,12 +22,14 @@ public class StockService {
     private final StockItemRepository stockItems;
     private final StockMovementRepository movements;
     private final ApplicationEventPublisher events;
+    private final AuditApi audit;
 
     StockService(StockItemRepository stockItems, StockMovementRepository movements,
-            ApplicationEventPublisher events) {
+            ApplicationEventPublisher events, AuditApi audit) {
         this.stockItems = stockItems;
         this.movements = movements;
         this.events = events;
+        this.audit = audit;
     }
 
     /**
@@ -83,6 +87,8 @@ public class StockService {
         // Flush now: if someone else changed this stock in the meantime, @Version makes this fail here
         // (GlobalErrorHandler turns it into 409 CONCURRENT_UPDATE), and the result shows the saved numbers.
         stockItems.flush();
+        audit.record(TenantId.of(tenantId), "STOCK_ADJUSTED", "PRODUCT", productId,
+                Map.of("change", command.change(), "reason", command.reason().name(), "onHand", item.getOnHand()));
 
         if (item.isLow()) {
             events.publishEvent(new StockLowEvent(TenantId.of(tenantId), productId, item.getAvailable(),

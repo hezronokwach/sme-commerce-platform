@@ -74,6 +74,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
+        <!-- Copies the log context (correlation id) onto background threads (ADR 0017). -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+        </dependency>
         <!-- Assistant (ADR 0007, 0015): the vector store in Postgres (pgvector), and the OpenAI-compatible
              client, pointed at Gemini for embeddings (and at Groq for chat, from #24). -->
         <dependency>
