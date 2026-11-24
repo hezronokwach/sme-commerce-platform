@@ -2,4 +2,10 @@
 |===
 |Base package
 |`com.hezron.smecommerce.assistant`
+|Bean references
+|* `c.h.s.c.CatalogApi` (in Catalog)
+|Events listened to
+|
+* `c.h.s.c.ProductCreatedEvent` (async) 
+* `c.h.s.c.ProductChangedEvent` (async) 
 |===

@@ -1,5 +1,6 @@
 package com.hezron.smecommerce.catalog.internal.application;
 
+import com.hezron.smecommerce.catalog.ActiveProductView;
 import com.hezron.smecommerce.catalog.CatalogApi;
 import com.hezron.smecommerce.catalog.PriceSnapshot;
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
@@ -35,6 +36,20 @@ class CatalogApiService implements CatalogApi {
                     product.getCurrency(), active));
         }
         return snapshots;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ActiveProductView> listActiveProducts(TenantId tenantId) {
+        List<ProductEntity> found = products.findAllByTenantIdAndStatusOrderByCreatedAtDesc(tenantId.value(),
+                ProductStatus.ACTIVE);
+
+        List<ActiveProductView> views = new ArrayList<>();
+        for (ProductEntity product : found) {
+            views.add(new ActiveProductView(product.getId(), product.getName(), product.getDescription(),
+                    product.getPrice()));
+        }
+        return views;
     }
 
 }

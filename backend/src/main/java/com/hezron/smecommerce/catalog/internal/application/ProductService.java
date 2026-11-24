@@ -98,9 +98,9 @@ public class ProductService {
             throw e;
         }
 
-        // Tells other modules (inventory, assistant) once they listen. Nobody does yet.
+        // Tells other modules: inventory creates the stock record, the assistant learns the product.
         events.publishEvent(new ProductCreatedEvent(TenantId.of(tenantId), product.getId(), product.getName(),
-                product.getDescription()));
+                product.getDescription(), product.getStatus().name(), product.getPrice()));
         return ProductResult.fromEntity(product);
     }
 
@@ -201,7 +201,7 @@ public class ProductService {
 
     private void publishChanged(UUID tenantId, ProductEntity product) {
         events.publishEvent(new ProductChangedEvent(TenantId.of(tenantId), product.getId(), product.getName(),
-                product.getDescription(), product.getStatus().name()));
+                product.getDescription(), product.getStatus().name(), product.getPrice()));
     }
 
     private static boolean errorMentions(DataIntegrityViolationException e, String constraintName) {

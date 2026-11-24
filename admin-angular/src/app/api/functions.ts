@@ -49,6 +49,14 @@ export type { StockAdjust$Params as StockAdjust$Params } from './fn/stock/stock-
 export { stockAdjust as stockAdjust } from './fn/stock/stock-adjust';
 export type { StockGet$Params as StockGet$Params } from './fn/stock/stock-get';
 export { stockGet as stockGet } from './fn/stock/stock-get';
+export type { AssistantDocumentReindexProducts$Params as AssistantDocumentReindexProducts$Params } from './fn/assistant-document/assistant-document-reindex-products';
+export { assistantDocumentReindexProducts as assistantDocumentReindexProducts } from './fn/assistant-document/assistant-document-reindex-products';
+export type { AssistantDocumentList$Params as AssistantDocumentList$Params } from './fn/assistant-document/assistant-document-list';
+export { assistantDocumentList as assistantDocumentList } from './fn/assistant-document/assistant-document-list';
+export type { AssistantDocumentUpload$Params as AssistantDocumentUpload$Params } from './fn/assistant-document/assistant-document-upload';
+export { assistantDocumentUpload as assistantDocumentUpload } from './fn/assistant-document/assistant-document-upload';
+export type { AssistantDocumentDelete$Params as AssistantDocumentDelete$Params } from './fn/assistant-document/assistant-document-delete';
+export { assistantDocumentDelete as assistantDocumentDelete } from './fn/assistant-document/assistant-document-delete';
 export type { ShopProfileGet$Params as ShopProfileGet$Params } from './fn/shop-profile/shop-profile-get';
 export { shopProfileGet as shopProfileGet } from './fn/shop-profile/shop-profile-get';
 export type { StorefrontCatalogListProducts$Params as StorefrontCatalogListProducts$Params } from './fn/storefront-catalog/storefront-catalog-list-products';
