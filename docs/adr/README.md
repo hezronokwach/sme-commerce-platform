@@ -24,3 +24,4 @@ One file per decision, numbered in order. Never rewrite an accepted record; add 
 | [0018](0018-deploy-on-render-and-vercel.md) | Deploy on Render and Vercel, with Vercel passing /api through | Accepted |
 | [0019](0019-mpesa-through-daraja.md) | M-Pesa through Daraja, and what happens when the customer paid but no callback came | Accepted |
 | [0020](0020-gemini-genai-client-and-groq-qwen.md) | Gemini through Spring AI's Google GenAI client, and Qwen on Groq | Accepted |
+| [0021](0021-database-on-neon.md) | The database is on Neon, not Render | Accepted |

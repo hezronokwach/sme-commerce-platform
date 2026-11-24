@@ -1,4 +1,4 @@
-# Render Blueprint (ADR 0018): the backend as a Docker web service, and its Postgres database.
+# Render Blueprint (ADR 0018, 0021): the backend as a Docker web service. The database is on Neon.
 # In Render: New > Blueprint, pick this repo, and set the Blueprint path to infra/render.yaml.
 # Values marked sync: false are typed into Render's dashboard; they never live in the repo.
 services:
@@ -14,26 +14,15 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      # Neon's direct (not "-pooler") connection, split into parts. See docs/deploy.md.
       - key: DB_HOST
-        fromDatabase:
-          name: sme-commerce-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: sme-commerce-db
-          property: port
+        sync: false
       - key: DB_NAME
-        fromDatabase:
-          name: sme-commerce-db
-          property: database
+        sync: false
       - key: DB_USER
-        fromDatabase:
-          name: sme-commerce-db
-          property: user
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase:
-          name: sme-commerce-db
-          property: password
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ALLOWED_ORIGINS
@@ -60,8 +49,3 @@ services:
       - key: MPESA_CALLBACK_SECRET
         generateValue: true
 
-databases:
-  - name: sme-commerce-db
-    region: frankfurt
-    plan: free
-    postgresMajorVersion: "17"

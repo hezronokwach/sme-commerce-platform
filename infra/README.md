@@ -17,5 +17,5 @@ docker compose -f infra/compose.yaml up --build
 
 ## Render
 
-`render.yaml` is the Render Blueprint for the backend and its database. The full steps are in
+`render.yaml` is the Render Blueprint for the backend. The database is on Neon (ADR 0021). The full steps are in
 [docs/deploy.md](../docs/deploy.md).
