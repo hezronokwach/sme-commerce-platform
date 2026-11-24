@@ -1,0 +1,5 @@
+# Kept out of the image build: build output, secrets and editor files.
+target/
+.env
+.idea/
+*.iml
