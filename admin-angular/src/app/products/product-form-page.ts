@@ -11,6 +11,7 @@ import { CategoryResponse } from '../api/models/category-response';
 import { ProductResponse } from '../api/models/product-response';
 import { codeFrom, messageFrom } from '../shared/error-message';
 import { parseShillings, shillingsText } from './parse-shillings';
+import { PhotoPicker } from './photo-picker';
 import { StockSection } from './stock-section';
 import { textOrEmpty } from '../shared/text-or-empty';
 
@@ -22,7 +23,7 @@ type ProductStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
  */
 @Component({
   selector: 'app-product-form-page',
-  imports: [FormsModule, RouterLink, StockSection],
+  imports: [FormsModule, RouterLink, PhotoPicker, StockSection],
   templateUrl: './product-form-page.html',
   styleUrl: './product-form-page.css',
 })
@@ -40,6 +41,8 @@ export class ProductFormPage implements OnInit {
   protected categoryId = '';
   protected status: ProductStatus = 'DRAFT';
   protected description = '';
+  /** Photo addresses, the main photo first (kept by the photo picker). */
+  protected photos: string[] = [];
 
   /**
    * The version the product had when we loaded it. Sent back on save: if someone else saved in the
@@ -111,6 +114,7 @@ export class ProductFormPage implements OnInit {
             priceMinor: priceMinor,
             categoryId: this.chosenCategory(),
             description: this.chosenDescription(),
+            imageUrls: this.photos,
             status: this.status,
           },
         });
@@ -124,6 +128,7 @@ export class ProductFormPage implements OnInit {
             priceMinor: priceMinor,
             categoryId: this.chosenCategory(),
             description: this.chosenDescription(),
+            imageUrls: this.photos,
             status: this.status,
             version: this.version,
           },
@@ -172,6 +177,10 @@ export class ProductFormPage implements OnInit {
     }
     this.categoryId = textOrEmpty(product.categoryId);
     this.description = textOrEmpty(product.description);
+    this.photos = [];
+    if (product.imageUrls !== undefined) {
+      this.photos = [...product.imageUrls];
+    }
     this.status = toStatus(product.status);
     this.savedStatus.set(this.status);
     if (product.version !== undefined) {

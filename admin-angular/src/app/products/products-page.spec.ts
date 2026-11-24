@@ -13,7 +13,7 @@ describe('buildRows', () => {
     );
 
     expect(rows).toEqual([
-      { id: 'p1', name: 'Sukuma bundle', price: 'KES 50.00', categoryName: 'Vegetables', status: 'ACTIVE' },
+      { id: 'p1', name: 'Sukuma bundle', photo: '', price: 'KES 50.00', categoryName: 'Vegetables', status: 'ACTIVE' },
     ]);
   });
 
@@ -53,6 +53,8 @@ describe('ProductsPage', () => {
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('Sukuma bundle');
     expect(rows[0].textContent).toContain('KES 50.00');
+    // The shop's link box asks for the shop's details.
+    backend.expectOne('/api/admin/shop').flush({ name: 'Mama Mboga', slug: 'mamamboga' });
     backend.verify();
   });
 
