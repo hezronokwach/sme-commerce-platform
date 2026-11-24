@@ -94,9 +94,10 @@ class EventSurvivesRestartTests {
                         "spring.datasource.username=" + database.getUsername(),
                         "spring.datasource.password=" + database.getPassword(),
                         "spring.docker.compose.enabled=false",
-                        "server.port=0",
                         "probe.listener-gets-stuck=" + listenerGetsStuck)
-                .run();
+                // As an argument, not in properties(): those are only defaults, so server.port from
+                // application.properties would win and clash with a backend already running locally.
+                .run("--server.port=0");
     }
 
     private static void publish(ConfigurableApplicationContext app, Object event) {
