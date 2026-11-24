@@ -1,0 +1,38 @@
+# The whole backend in Docker, built exactly as Render will run it (Guide 8.3). Use it before a deploy:
+#   docker compose -f infra/compose.yaml up --build
+# Day to day, run only Postgres (backend/compose.yaml) and the app from your IDE.
+name: sme-commerce-full
+
+services:
+  postgres:
+    image: 'pgvector/pgvector:pg17'
+    environment:
+      POSTGRES_DB: smecommerce
+      POSTGRES_USER: smecommerce
+      POSTGRES_PASSWORD: local-only-password
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smecommerce -d smecommerce']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ../backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # JWT_SECRET and the API keys, from the same git-ignored file the IDE uses.
+    env_file:
+      - path: ../backend/.env
+        required: false
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/smecommerce'
+      SPRING_DATASOURCE_USERNAME: smecommerce
+      SPRING_DATASOURCE_PASSWORD: local-only-password
+    ports:
+      - '8080:8080'
+
+volumes:
+  pgdata:
