@@ -11,9 +11,11 @@ header {
 }
 
 .button {
-  padding: 6px 12px;
-  border: 1px solid currentColor;
-  color: inherit;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -26,7 +28,7 @@ th,
 td {
   padding: 8px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 .price {
@@ -35,5 +37,5 @@ td {
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--danger);
 }

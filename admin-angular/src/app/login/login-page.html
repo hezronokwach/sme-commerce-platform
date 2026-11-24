@@ -1,28 +1,42 @@
-<main class="login">
-  <h1>Shop admin</h1>
+<div class="auth">
+  <aside class="auth-side">
+    <a class="auth-wordmark" [href]="homeUrl">SME Commerce</a>
+    <div class="auth-side-text">
+      <p class="eyebrow">Shop admin</p>
+      <p class="auth-quote">Your products, stock and orders, in <em>one place</em>.</p>
+    </div>
+  </aside>
 
-  <!-- (ngSubmit) runs logIn() when the button is clicked or Enter is pressed. -->
-  <form (ngSubmit)="logIn()">
-    <label>
-      Email
-      <input name="email" type="email" autocomplete="username" required [(ngModel)]="email" />
-    </label>
+  <main class="auth-main">
+    <div class="auth-card">
+      <p class="eyebrow">Welcome back</p>
+      <h1>Log in</h1>
+      <p class="auth-sub">New here? <a routerLink="/signup">Open your shop</a></p>
 
-    <label>
-      Password
-      <input name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" />
-    </label>
+      <!-- (ngSubmit) runs logIn() when the button is clicked or Enter is pressed. -->
+      <form class="auth-form" (ngSubmit)="logIn()">
+        <label>
+          Email
+          <input name="email" type="email" autocomplete="username" required [(ngModel)]="email" />
+        </label>
 
-    <button type="submit" [disabled]="busy()">
-      @if (busy()) {
-        Logging in…
-      } @else {
-        Log in
-      }
-    </button>
+        <label>
+          Password
+          <input name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" />
+        </label>
 
-    @if (errorMessage() !== null) {
-      <p class="error" role="alert">{{ errorMessage() }}</p>
-    }
-  </form>
-</main>
+        <button type="submit" class="primary" [disabled]="busy()">
+          @if (busy()) {
+            Logging in…
+          } @else {
+            Log in
+          }
+        </button>
+
+        @if (errorMessage() !== null) {
+          <p class="error" role="alert">{{ errorMessage() }}</p>
+        }
+      </form>
+    </div>
+  </main>
+</div>

@@ -1,32 +1,42 @@
 .top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #ddd;
+  gap: 12px 28px;
   flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgb(245 240 232 / 92%);
+  backdrop-filter: blur(8px);
 }
 
 .shop {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
 nav {
   display: flex;
-  gap: 16px;
+  gap: 4px;
   flex: 1;
+  overflow-x: auto;
 }
 
 nav a {
+  padding: 6px 14px;
+  border-radius: 999px;
   color: inherit;
+  font-size: 0.9rem;
   text-decoration: none;
-  padding: 4px 0;
-  border-bottom: 2px solid transparent;
+  white-space: nowrap;
 }
 
 nav a.active {
-  border-bottom-color: currentColor;
-  font-weight: 600;
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .account {
@@ -36,11 +46,26 @@ nav a.active {
 }
 
 .role {
-  color: #555;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 button {
-  padding: 6px 12px;
-  font: inherit;
-  cursor: pointer;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+}
+
+/* On a phone: the name and account on one line, the menu below them. */
+@media (max-width: 640px) {
+  .shop {
+    flex: 1;
+  }
+
+  nav {
+    order: 3;
+    flex-basis: 100%;
+  }
 }

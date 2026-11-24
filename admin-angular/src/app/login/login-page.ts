@@ -1,19 +1,22 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { messageFrom } from '../shared/error-message';
 
-/** The login form at /login. On success it opens the product list. */
+/** The login form at /login. On success it opens the product list. Styles: .auth in styles.css. */
 @Component({
   selector: 'app-login-page',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login-page.html',
-  styleUrl: './login-page.css',
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+
+  /** The storefront's home page, behind the wordmark. */
+  protected readonly homeUrl = environment.storefrontUrl + '/';
 
   // Bound to the two inputs with [(ngModel)], so they always hold what the user typed.
   email = '';
