@@ -20,7 +20,9 @@ RUN groupadd --system app && useradd --system --gid app --no-create-home app
 WORKDIR /app
 COPY --from=build /build/app.jar app.jar
 USER app
-# Render (and most hosts) pass the port in PORT; application.properties reads it, 8080 by default.
+# Render (and most hosts) pass the port in PORT, which application.properties reads. Inside the
+# container we default it to 8080; 8081 is only the local-development default.
+ENV PORT=8080
 EXPOSE 8080
 # Use up to 75% of the container's memory for the heap, whatever size the host gives it.
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
