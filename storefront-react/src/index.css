@@ -347,6 +347,45 @@ textarea {
   font-size: 0.9rem;
 }
 
+/* Several photos: the large one, then a row of small ones to switch between them. */
+.product-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.gallery-thumbs button {
+  display: block;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: var(--sand);
+  overflow: hidden;
+}
+
+.gallery-thumbs button[aria-pressed='true'] {
+  border-color: var(--primary);
+}
+
+.gallery-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* Square on a phone, so the name and price are on the first screen. */
 .product-page .product-image {
   aspect-ratio: 1;

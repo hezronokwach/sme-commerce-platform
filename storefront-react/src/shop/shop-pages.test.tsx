@@ -118,4 +118,26 @@ describe('shop pages', () => {
 
     expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
   })
+
+  it('switches between the photos of a product with several', async () => {
+    const photo1 = 'https://res.cloudinary.com/demo/image/upload/v1/one.jpg'
+    const photo2 = 'https://res.cloudinary.com/demo/image/upload/v1/two.jpg'
+    fakeBackend()
+      .answer('/api/store/mamamboga', 200, mamaMboga)
+      .answer('/api/store/mamamboga/products/sukuma-bundle', 200, {
+        ...sukuma,
+        imageUrl: photo1,
+        imageUrls: [photo1, photo2],
+      })
+      .install()
+    openPage('/s/mamamboga/p/sukuma-bundle')
+
+    const large = await screen.findByAltText('Sukuma bundle, photo 1 of 2')
+    expect(large.getAttribute('src')).toContain('c_limit,w_1200')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show photo 2' }))
+
+    expect(screen.getByAltText('Sukuma bundle, photo 2 of 2').getAttribute('src')).toContain('two.jpg')
+    expect(screen.getByRole('button', { name: 'Show photo 2' })).toHaveAttribute('aria-pressed', 'true')
+  })
 })

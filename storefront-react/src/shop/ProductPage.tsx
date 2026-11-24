@@ -4,7 +4,7 @@ import { api } from '../api/client'
 import type { StoreProduct } from '../api/client'
 import { AddToCart } from '../cart/AddToCart'
 import { formatMoney } from '../money'
-import { ProductImage } from './ProductImage'
+import { ProductGallery } from './ProductGallery'
 import { useShop } from './shop-context'
 
 // One product, found by its web name: /s/mamamboga/p/sukuma-bundle. A draft, archived or unknown
@@ -85,7 +85,7 @@ function LoadedProduct({ slug, productSlug }: { slug: string; productSlug: strin
   return (
     <article className="product-page">
       {backToShop}
-      <ProductImage product={product} />
+      <ProductGallery product={product} />
       <div className="product-details">
         <h1>{product.name}</h1>
         <p className="product-price">{formatMoney(product.priceMinor ?? 0, product.currency ?? 'KES')}</p>
