@@ -22,9 +22,9 @@ import org.springframework.data.domain.Persistable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // for JPA
 public class TenantBrandingEntity implements Persistable<UUID> {
 
-    /** Colours a new shop starts with until the owner picks its own. */
-    static final String DEFAULT_PRIMARY_COLOR = "#0F766E";
-    static final String DEFAULT_ACCENT_COLOR = "#F59E0B";
+    /** Colours a new shop starts with until the owner picks its own: espresso buttons, terracotta accents. */
+    static final String DEFAULT_PRIMARY_COLOR = "#1F1B17";
+    static final String DEFAULT_ACCENT_COLOR = "#B4532A";
 
     @Id
     @Column(name = "tenant_id")

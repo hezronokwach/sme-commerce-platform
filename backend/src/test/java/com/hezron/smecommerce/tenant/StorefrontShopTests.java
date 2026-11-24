@@ -46,7 +46,7 @@ class StorefrontShopTests {
         assertThat(result).hasStatus(HttpStatus.OK);
         assertThat(result).bodyJson().extractingPath("$.name").isEqualTo("Mama Mboga");
         assertThat(result).bodyJson().extractingPath("$.currency").isEqualTo("KES");
-        assertThat(result).bodyJson().extractingPath("$.primaryColor").isEqualTo("#0F766E");
+        assertThat(result).bodyJson().extractingPath("$.primaryColor").isEqualTo("#1F1B17");
         // Internal details stay inside: customers never need the shop's id, plan or status.
         assertThat(result).bodyJson().doesNotHavePath("$.id");
         assertThat(result).bodyJson().doesNotHavePath("$.tenantId");
