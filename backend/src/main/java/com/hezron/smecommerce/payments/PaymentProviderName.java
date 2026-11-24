@@ -7,10 +7,10 @@ package com.hezron.smecommerce.payments;
  */
 public enum PaymentProviderName {
 
-    /** Safaricom M-Pesa STK push (issue "M-Pesa part 1"). */
+    /** Safaricom M-Pesa STK push through Daraja (ADR 0019). */
     MPESA,
 
-    /** Card payments (issue "Second payment provider"). */
+    /** Card payments through Stripe (ADR 0013). */
     CARD,
 
     /** Pretend provider for development and tests: no real money, outcome picked by the phone number. */

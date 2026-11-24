@@ -55,7 +55,7 @@ class PaymentRequestedListener {
     private StartResult askProvider(StartJob job) {
         Optional<PaymentProvider> provider = providers.find(job.provider());
         if (provider.isEmpty()) {
-            // MPESA and CARD come in later issues. Until then the customer is told plainly.
+            // Every provider name has a provider today; this only guards against a name added without one.
             return StartResult.rejected(job.provider() + " payments are not connected yet. Please choose another way to pay.");
         }
         try {

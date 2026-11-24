@@ -4,8 +4,8 @@ import com.hezron.smecommerce.shared.TenantId;
 import java.util.UUID;
 
 /**
- * The money for an order arrived. Ordering listens and marks the order PAID; notification will
- * listen to tell the customer (later issue).
+ * The money for an order arrived. Ordering listens and marks the order PAID; the order's status change
+ * then reaches the customer's live page through ordering's OrderStatusChangedEvent.
  *
  * @param amountMinor cents actually collected (already checked against what was asked)
  */

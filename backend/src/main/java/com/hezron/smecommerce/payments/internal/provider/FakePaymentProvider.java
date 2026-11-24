@@ -157,8 +157,8 @@ class FakePaymentProvider implements PaymentProvider {
             try {
                 callbacks.receive(PaymentProviderName.FAKE, rawBody);
             } catch (RuntimeException e) {
-                // A real provider would just see an error answer; the reconciliation job (later issue)
-                // finds payments whose callback never got through.
+                // A real provider would just see an error answer; the reconciliation job finds payments
+                // whose callback never got through.
                 log.error("Fake callback could not be applied", e);
             } finally {
                 MDC.clear();
