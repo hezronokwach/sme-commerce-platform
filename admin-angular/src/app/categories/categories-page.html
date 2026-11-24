@@ -1,0 +1,45 @@
+<main class="page">
+  <h1>Categories</h1>
+  <p class="hint">Customers can filter your shop by these, in this order. Pick one for each product on its page.</p>
+
+  <form class="add" (ngSubmit)="add()">
+    <label for="new-category" class="visually-hidden">New category name</label>
+    <input id="new-category" name="newName" maxlength="80" placeholder="e.g. Paint" [(ngModel)]="newName" />
+    <button type="submit" [disabled]="busy()">Add category</button>
+  </form>
+
+  @if (errorMessage() !== null) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (rows().length === 0) {
+    <p class="empty">No categories yet. Add your first one above.</p>
+  } @else {
+    <ol class="category-list">
+      @for (row of rows(); track row.id; let index = $index, first = $first, last = $last) {
+        <li class="category">
+          @if (renamingId() === row.id) {
+            <form class="rename" (ngSubmit)="saveRename(row)">
+              <label [for]="'rename-' + row.id" class="visually-hidden">New name for {{ row.name }}</label>
+              <input [id]="'rename-' + row.id" name="renameText" maxlength="80" [(ngModel)]="renameText" />
+              <button type="submit" [disabled]="busy()">Save</button>
+              <button type="button" class="quiet" (click)="cancelRename()">Cancel</button>
+            </form>
+          } @else {
+            <span class="name">{{ row.name }}</span>
+            <span class="actions">
+              <button type="button" class="icon" [disabled]="busy() || first" (click)="move(index, -1)"
+                [attr.aria-label]="'Move ' + row.name + ' up'">↑</button>
+              <button type="button" class="icon" [disabled]="busy() || last" (click)="move(index, 1)"
+                [attr.aria-label]="'Move ' + row.name + ' down'">↓</button>
+              <button type="button" class="quiet" [disabled]="busy()" (click)="startRename(row)">Rename</button>
+              <button type="button" class="quiet danger" [disabled]="busy()" (click)="remove(row)">Delete</button>
+            </span>
+          }
+        </li>
+      }
+    </ol>
+  }
+</main>

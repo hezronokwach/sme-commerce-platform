@@ -23,6 +23,7 @@ nav {
   gap: 4px;
   flex: 1;
   overflow-x: auto;
+  scrollbar-width: none;
 }
 
 nav a {

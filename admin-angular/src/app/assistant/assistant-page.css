@@ -1,0 +1,108 @@
+.hint {
+  color: var(--muted);
+}
+
+h2 {
+  margin: 32px 0 8px;
+}
+
+.panel {
+  margin-top: 24px;
+  padding: 4px 20px 20px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.panel h2 {
+  margin-top: 16px;
+}
+
+.upload {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 520px;
+}
+
+.upload label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.upload input {
+  font-weight: normal;
+}
+
+.documents {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.document {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  display: block;
+  font-weight: 600;
+}
+
+.meta {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.document-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--sand);
+  color: var(--muted);
+}
+
+.badge-READY {
+  background: #e1e9dc;
+  color: var(--success);
+}
+
+.badge-FAILED {
+  background: #f2dcd6;
+  color: var(--danger);
+}
+
+button.quiet {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.info {
+  color: var(--success);
+}
