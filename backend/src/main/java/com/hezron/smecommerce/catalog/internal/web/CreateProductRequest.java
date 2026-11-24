@@ -4,8 +4,11 @@ import com.hezron.smecommerce.catalog.internal.application.CreateProductCommand;
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -21,11 +24,21 @@ record CreateProductRequest(
         @Size(max = 130) String slug,
         @Size(max = 5000) String description,
         @NotNull @PositiveOrZero Long priceMinor,
-        @Size(max = 2000) String imageUrl,
+        // Up to five photos, each an https address (an upload to Cloudinary, ADR 0022).
+        @Size(max = 5) List<@NotBlank @Size(max = 2000) @Pattern(regexp = "^https://.+",
+                message = "must be an https address") String> imageUrls,
         ProductStatus status) {
 
     CreateProductCommand toCommand() {
-        return new CreateProductCommand(categoryId, name, slug, description, priceMinor, imageUrl, status);
+        return new CreateProductCommand(categoryId, name, slug, description, priceMinor, photosOrNone(), status);
+    }
+
+    /** A missing list means no photos. */
+    private List<String> photosOrNone() {
+        if (imageUrls == null) {
+            return new ArrayList<>();
+        }
+        return imageUrls;
     }
 
 }

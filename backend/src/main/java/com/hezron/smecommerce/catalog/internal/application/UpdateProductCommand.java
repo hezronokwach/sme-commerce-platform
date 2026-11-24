@@ -1,6 +1,7 @@
 package com.hezron.smecommerce.catalog.internal.application;
 
 import com.hezron.smecommerce.catalog.internal.domain.ProductStatus;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -12,5 +13,5 @@ import java.util.UUID;
  * @param status          DRAFT or ACTIVE (archive with delete instead)
  */
 public record UpdateProductCommand(int expectedVersion, UUID categoryId, String name, String description,
-        long priceMinor, String imageUrl, ProductStatus status) {
+        long priceMinor, List<String> imageUrls, ProductStatus status) {
 }
