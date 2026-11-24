@@ -14,7 +14,7 @@ Angular admin for shop staff and a React storefront for customers.
 | --- | --- |
 | Shop owners and staff | Sign up, log in (JWT with rotating refresh tokens), products and categories, stock with a full history, orders with a live feed, payment method settings, assistant documents |
 | Customers | Browse a shop, cart, checkout with no account, pay, watch the order status change live, ask the shop's assistant |
-| Payments | A provider interface with a fake provider (stands in for M-Pesa) and Stripe test mode for cards. Callbacks are idempotent; a status-query job settles payments whose callback never came; unpaid orders expire and release their stock |
+| Payments | One provider interface with three providers: M-Pesa through Safaricom's Daraja API (STK push), Stripe test mode for cards, and a fake provider for development. Callbacks are idempotent; a status-query job settles payments whose callback never came; unpaid orders expire and release their stock |
 | Safety | Every query names the shop, with cross-shop tests in every module. Rate limits, CORS, an audit log of sensitive changes, and one correlation id that follows an order through the logs |
 
 ## Architecture
@@ -122,8 +122,8 @@ deployment. The design documents are in [docs](docs), and deployment steps in [d
 
 ## What I would do next
 
-- **M-Pesa Daraja** (STK Push and its callback) behind the existing provider interface. The fake provider
-  already reproduces its outcomes.
+- **Per-shop payment credentials.** Each shop's M-Pesa and Stripe keys, encrypted, instead of one platform
+  account; and a nightly comparison with the M-Pesa statement.
 - **Several backend instances.** Live updates and rate limits live in each instance's memory today.
   Scaling out needs a shared broker (Redis or Postgres LISTEN/NOTIFY) for SSE, and a shared store for limits.
 - **A real `tenant_id` column for vector search.** pgvector filters after the index scan, so with many

@@ -21,8 +21,8 @@ final class KnownPaymentMethods {
             // Standing in for M-Pesa until M-Pesa is connected: the phone's last digit picks the outcome.
             new Method(FAKE, "M-Pesa (test)", true),
             new Method(CARD, "Card", true),
-            // Not connected yet (issues "M-Pesa part 1 and 2").
-            new Method(MPESA, "M-Pesa", false));
+            // Daraja (ADR 0019). Until its keys are set, an attempt is refused with "not set up yet".
+            new Method(MPESA, "M-Pesa", true));
 
     private KnownPaymentMethods() {
     }
