@@ -1,3 +1,7 @@
+# Our own project name. By default Compose uses the folder name, and another project on this machine is
+# also in a folder called "backend": Spring Boot would then connect to that project's database.
+name: sme-commerce
+
 services:
   postgres:
     # Same pgvector image as the tests (TestcontainersConfiguration); V1 runs CREATE EXTENSION vector.
@@ -19,3 +23,5 @@ services:
 
 volumes:
   pgdata:
+    # The volume's original name, so existing local data survives the new project name.
+    name: backend_pgdata

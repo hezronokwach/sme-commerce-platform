@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link, Outlet, useParams } from 'react-router'
 import { api } from '../api/client'
+import { AssistantPanel } from '../assistant/AssistantPanel'
 import type { ShopProfile } from '../api/client'
 import { CartProvider } from '../cart/CartProvider'
 import { CartBadge } from '../cart/CartBadge'
@@ -100,6 +101,7 @@ function LoadedShop({ slug }: { slug: string }) {
         <main>
           <Outlet context={context} />
         </main>
+        <AssistantPanel slug={slug} shopName={shop.name ?? slug} />
       </div>
     </CartProvider>
   )
