@@ -114,7 +114,7 @@ describe('shop pages', () => {
   it('shows "Page not found" for an address outside any shop', async () => {
     fakeBackend().install()
 
-    openPage('/')
+    openPage('/nowhere')
 
     expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
   })
